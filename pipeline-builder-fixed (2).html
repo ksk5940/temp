@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>DevOps Pipeline Builder — Enhanced</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+      if (typeof JSZip === 'undefined') {
+        console.error('JSZip failed to load from CDN');
+      }
+    });
+  </script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --bg:#0b1120;--panel:#111827;--panel-2:#1e293b;--panel-3:#334155;
+      --border:#334155;--text:#e2e8f0;--muted:#94a3b8;
+      --primary:#2563eb;--primary-h:#1d4ed8;
+      --success:#16a34a;--danger:#dc2626;--warning:#f59e0b;
+      --shadow:rgba(0,0,0,.35);
+      --green:#22c55e;--cyan:#06b6d4;--orange:#f97316;--violet:#8b5cf6;
+    }
+    body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    a{text-decoration:none;color:inherit;}
+
+    /* LAYOUT */
+    .app-shell{display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:260px;background:linear-gradient(180deg,#0f172a 0%,#111827 100%);border-right:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:0;flex-shrink:0;}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:24px;}
+    .brand-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+    .brand h2{font-size:15px;color:#fff;line-height:1.2;}
+    .brand p{color:var(--muted);font-size:11px;margin-top:2px;}
+    .nav-menu{display:flex;flex-direction:column;gap:4px;}
+    .nav-menu a{padding:10px 14px;border-radius:10px;color:#cbd5e1;transition:all .2s;font-size:13px;font-weight:500;}
+    .nav-menu a:hover,.nav-menu a.active{background:var(--panel-2);color:#fff;}
+    .nav-menu a.active{background:rgba(37,99,235,.15);color:#60a5fa;border-left:3px solid #2563eb;padding-left:11px;}
+
+    /* MAIN */
+    .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    .topbar{height:64px;border-bottom:1px solid var(--border);background:rgba(17,24,39,.97);display:flex;justify-content:space-between;align-items:center;padding:0 24px;position:sticky;top:0;z-index:10;}
+    .topbar h1{font-size:18px;color:#fff;font-weight:600;}
+    .topbar-right{display:flex;align-items:center;gap:10px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;}
+    .page-body{padding:24px;overflow-y:auto;flex:1;}
+
+    /* WIZARD LAYOUT */
+    .wizard-grid{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start;}
+
+    /* STEP NAV */
+    .step-nav{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:12px;position:sticky;top:88px;}
+    .step-nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:2px;}
+    .step-nav-item:hover{background:var(--panel-2);}
+    .step-nav-item.active{background:rgba(37,99,235,.15);color:#60a5fa;}
+    .step-num{width:22px;height:22px;border-radius:50%;background:var(--panel-3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--muted);}
+    .step-nav-item.active .step-num{background:#2563eb;color:#fff;}
+    .step-nav-item.done .step-num{background:var(--success);color:#fff;}
+    .step-nav-item .step-label{font-size:12px;font-weight:500;}
+
+    /* STEP PANEL */
+    .step-panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;}
+    .step-pane{display:none;}
+    .step-pane.active{display:block;}
+    .step-pane h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;}
+    .step-pane .step-desc{color:var(--muted);font-size:13px;margin-bottom:24px;}
+
+    /* FORM */
+    label{display:block;font-size:13px;font-weight:600;color:#cbd5e1;margin-bottom:6px;}
+    .input,select,textarea{width:100%;padding:11px 14px;background:#0f172a;border:1px solid var(--border);border-radius:10px;color:#fff;outline:none;font-size:14px;font-family:inherit;transition:border-color .2s;}
+    .input:focus,select:focus,textarea:focus{border-color:var(--primary);}
+    select option{background:#111827;}
+    .form-row{margin-bottom:18px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+    /* CHECKBOXES / RADIOS */
+    .check-group{display:flex;flex-direction:column;gap:10px;}
+    .check-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s;background:#0f172a;}
+    .check-item:hover{border-color:var(--primary);}
+    .check-item input{accent-color:var(--primary);width:16px;height:16px;}
+    .check-item-text strong{display:block;font-size:13px;color:#fff;}
+    .check-item-text span{font-size:12px;color:var(--muted);}
+
+    /* LANGUAGE CARDS */
+    .lang-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+    .lang-card{padding:14px 10px;border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .2s;background:#0f172a;}
+    .lang-card:hover{border-color:var(--primary);background:rgba(37,99,235,.08);}
+    .lang-card.selected{border-color:var(--primary);background:rgba(37,99,235,.15);}
+    .lang-card .lang-icon{font-size:28px;margin-bottom:6px;}
+    .lang-card .lang-name{font-size:12px;font-weight:600;color:#cbd5e1;}
+
+    /* BUTTONS */
+    .btn{padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.3);}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.4);}
+    .btn-secondary{background:#1e293b;color:#e2e8f0;border:1px solid #475569;}
+    .btn-secondary:hover{background:#334155;color:#fff;}
+    .btn-success{background:var(--success);color:#fff;}
+    .btn-success:hover{background:#15803d;}
+    .btn-danger-outline{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+    .btn-sm{padding:7px 12px;font-size:12px;}
+
+    /* STEP FOOTER */
+    .step-footer{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);}
+
+    /* YAML PREVIEW */
+    .yaml-tabs{display:flex;gap:4px;margin-bottom:0;border-bottom:1px solid var(--border);}
+    .yaml-tab{padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0;color:var(--muted);border:1px solid transparent;border-bottom:none;transition:all .2s;}
+    .yaml-tab.active{background:#0f172a;color:#60a5fa;border-color:var(--border);}
+    .yaml-box{background:#0f172a;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:20px;max-height:480px;overflow-y:auto;}
+    pre.yaml{font-family:"JetBrains Mono","Fira Code","Cascadia Code",monospace;font-size:12px;line-height:1.7;white-space:pre;color:#e2e8f0;}
+    .yaml-keyword{color:#60a5fa;}
+    .yaml-string{color:#86efac;}
+    .yaml-comment{color:#64748b;}
+    .yaml-var{color:#fde68a;}
+    .yaml-section{color:#f9a8d4;}
+
+    /* REVIEW SUMMARY */
+    .review-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+    .review-card{background:#0f172a;border:1px solid var(--border);border-radius:10px;padding:14px;}
+    .review-card .rc-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;}
+    .review-card .rc-val{font-size:14px;font-weight:600;color:#fff;}
+
+    /* PIPELINE VISUAL */
+    .pipeline-visual{display:flex;align-items:center;gap:0;margin:20px 0;overflow-x:auto;padding:12px 0;}
+    .pipe-stage{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:80px;}
+    .pipe-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .pipe-label{font-size:10px;font-weight:600;color:var(--muted);text-align:center;}
+    .pipe-arrow{color:var(--border);font-size:20px;margin:0 4px;flex-shrink:0;margin-top:-18px;}
+    .pi-build{background:rgba(37,99,235,.2);color:#60a5fa;}
+    .pi-test{background:rgba(139,92,246,.2);color:#a78bfa;}
+    .pi-scan{background:rgba(245,158,11,.2);color:#fcd34d;}
+    .pi-docker{background:rgba(6,182,212,.2);color:#22d3ee;}
+    .pi-deploy{background:rgba(34,197,94,.2);color:#86efac;}
+
+    /* STATUS BADGES */
+    .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+    .badge-blue{background:rgba(37,99,235,.15);color:#60a5fa;}
+    .badge-green{background:rgba(34,197,94,.15);color:#86efac;}
+    .badge-orange{background:rgba(249,115,22,.15);color:#fdba74;}
+    .badge-violet{background:rgba(139,92,246,.15);color:#c4b5fd;}
+
+    /* DOWNLOAD SECTION */
+    .download-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:20px;}
+    .dl-card{background:#0f172a;border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .dl-card .dl-lang{font-size:13px;font-weight:700;color:#fff;}
+    .dl-card .dl-sub{font-size:11px;color:var(--muted);}
+
+    /* TOAST */
+    .toast{position:fixed;top:20px;right:20px;background:#111827;color:#fff;border:1px solid #334155;padding:14px 20px;border-radius:12px;z-index:9999;transform:translateX(400px);transition:.3s;font-size:13px;}
+    .toast.show{transform:translateX(0);}
+    .toast-success{border-left:4px solid var(--success);}
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar{width:6px;height:6px;}
+    ::-webkit-scrollbar-track{background:#0f172a;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">⚙</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+    <nav class="nav-menu">
+      <a href="#" onclick="navTo('dashboard')" id="nav-dashboard">📊 Dashboard</a>
+      <a href="#" onclick="navTo('pipeline')" id="nav-pipeline" class="active">🚀 Pipeline Builder</a>
+      <a href="#" onclick="navTo('onboarding')" id="nav-onboarding">🆕 App Onboarding</a>
+      <a href="#" onclick="navTo('applications')" id="nav-applications">📦 Applications</a>
+      <a href="#" onclick="navTo('clusters')" id="nav-clusters">☸️ Clusters</a>
+      <a href="#" onclick="navTo('secrets')" id="nav-secrets">🔑 Secrets</a>
+      <a href="#" onclick="navTo('approvals')" id="nav-approvals">✅ Approvals</a>
+      <a href="#" onclick="navTo('auditlogs')" id="nav-auditlogs">📋 Audit Logs</a>
+      <a href="#" onclick="navTo('admin')" id="nav-admin">🛠 Admin</a>
+      <a href="#" onclick="navTo('settings')" id="nav-settings">⚙️ Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h1 id="page-title">🚀 Pipeline Builder Wizard</h1>
+      <div class="topbar-right">
+        <span style="font-size:12px;color:var(--muted);">Platform Admin</span>
+        <div class="avatar">PA</div>
+      </div>
+    </header>
+
+    <!-- PAGE: PIPELINE BUILDER (default) -->
+    <div id="page-pipeline" class="page-body">
+      <div class="wizard-grid">
+
+        <!-- STEP NAV -->
+        <div class="step-nav">
+          <div id="nav-0" class="step-nav-item active" onclick="showStep(0)">
+            <div class="step-num">1</div><span class="step-label">Project Details</span>
+          </div>
+          <div id="nav-1" class="step-nav-item" onclick="showStep(1)">
+            <div class="step-num">2</div><span class="step-label">Lifecycle</span>
+          </div>
+          <div id="nav-2" class="step-nav-item" onclick="showStep(2)">
+            <div class="step-num">3</div><span class="step-label">Technology</span>
+          </div>
+          <div id="nav-3" class="step-nav-item" onclick="showStep(3)">
+            <div class="step-num">4</div><span class="step-label">Security Scans</span>
+          </div>
+          <div id="nav-4" class="step-nav-item" onclick="showStep(4)">
+            <div class="step-num">5</div><span class="step-label">Container Build</span>
+          </div>
+          <div id="nav-5" class="step-nav-item" onclick="showStep(5)">
+            <div class="step-num">6</div><span class="step-label">Registry</span>
+          </div>
+          <div id="nav-6" class="step-nav-item" onclick="showStep(6)">
+            <div class="step-num">7</div><span class="step-label">Deployment</span>
+          </div>
+          <div id="nav-7" class="step-nav-item" onclick="showStep(7)">
+            <div class="step-num">8</div><span class="step-label">Cluster Config</span>
+          </div>
+          <div id="nav-8" class="step-nav-item" onclick="showStep(8)">
+            <div class="step-num">9</div><span class="step-label">Secrets</span>
+          </div>
+          <div id="nav-9" class="step-nav-item" onclick="showStep(9)">
+            <div class="step-num">10</div><span class="step-label">Review & Generate</span>
+          </div>
+        </div>
+
+        <!-- STEP PANEL -->
+        <div class="step-panel">
+
+          <!-- STEP 1: PROJECT DETAILS -->
+          <div class="step-pane active" id="step-0">
+            <h2>Project Details</h2>
+            <p class="step-desc">Basic information about your application and repository.</p>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Project Name</label>
+                <input class="input" id="projectName" value="payments-api" placeholder="my-service">
+              </div>
+              <div class="form-row">
+                <label>Team</label>
+                <input class="input" id="teamName" value="platform-team" placeholder="team-name">
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Repository URL</label>
+              <input class="input" id="repoUrl" value="https://gitlab.company.com/platform/payments-api">
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Default Branch</label>
+                <input class="input" id="branch" value="main">
+              </div>
+              <div class="form-row">
+                <label>Environment</label>
+                <select class="input" id="environment">
+                  <option>dev</option><option>qa</option><option selected>prod</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-footer" style="display:flex;justify-content:flex-end;">
+              <button class="btn btn-primary" onclick="nextStep()">Next: Lifecycle →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: LIFECYCLE -->
+          <div class="step-pane" id="step-1">
+            <h2>Lifecycle</h2>
+            <p class="step-desc">Is this a new application or an existing deployment?</p>
+            <div class="check-group">
+              <label class="check-item">
+                <input type="radio" name="life" value="new" checked>
+                <div class="check-item-text">
+                  <strong>New Application Onboarding</strong>
+                  <span>Fresh setup — creates namespace, RBAC, secrets, and pipeline from scratch</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="life" value="existing">
+                <div class="check-item-text">
+                  <strong>Existing Deployment</strong>
+                  <span>Add or update pipeline for a project already running on the platform</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="life" value="migration">
+                <div class="check-item-text">
+                  <strong>Migration</strong>
+                  <span>Migrating from another CI/CD system (Jenkins, GitHub Actions, etc.)</span>
+                </div>
+              </label>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Technology →</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: TECHNOLOGY -->
+          <div class="step-pane" id="step-2">
+            <h2>Technology</h2>
+            <p class="step-desc">Select the language and build tool. Each language generates a complete, tailored pipeline.</p>
+
+            <label style="margin-bottom:12px;">Language</label>
+            <div class="lang-grid">
+              <div class="lang-card selected" id="lc-java" onclick="selectLang('java')">
+                <div class="lang-icon">☕</div>
+                <div class="lang-name">Java</div>
+              </div>
+              <div class="lang-card" id="lc-nodejs" onclick="selectLang('nodejs')">
+                <div class="lang-icon">🟢</div>
+                <div class="lang-name">Node.js</div>
+              </div>
+              <div class="lang-card" id="lc-python" onclick="selectLang('python')">
+                <div class="lang-icon">🐍</div>
+                <div class="lang-name">Python</div>
+              </div>
+              <div class="lang-card" id="lc-go" onclick="selectLang('go')">
+                <div class="lang-icon">🐹</div>
+                <div class="lang-name">Go</div>
+              </div>
+              <div class="lang-card" id="lc-dotnet" onclick="selectLang('dotnet')">
+                <div class="lang-icon">🔷</div>
+                <div class="lang-name">.NET</div>
+              </div>
+            </div>
+
+            <!-- Language info banner — updates on selection -->
+            <div id="lang-info-banner" style="background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;">
+              <span id="lang-banner-icon" style="font-size:24px;">☕</span>
+              <div>
+                <div id="lang-banner-title" style="font-size:13px;font-weight:700;color:#60a5fa;">Java</div>
+                <div id="lang-banner-desc" style="font-size:12px;color:var(--muted);">Maven/Gradle · JAR/WAR/EAR · JDK 11/17/21</div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-row">
+                <label id="buildToolLabel">Build Tool</label>
+                <select class="input" id="buildTool">
+                  <option>Maven</option><option>Gradle</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label id="packagingLabel">Packaging</label>
+                <select class="input" id="packaging">
+                  <option>JAR</option><option>WAR</option><option>EAR</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label id="runtimeLabel">Runtime Version</label>
+              <select class="input" id="runtimeVersion">
+                <option>17 (LTS)</option><option>21 (LTS)</option><option>11</option>
+              </select>
+            </div>
+
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Security →</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: SECURITY -->
+          <div class="step-pane" id="step-3">
+            <h2>Security Scans</h2>
+            <p class="step-desc">Select the security tools to include in your pipeline.</p>
+            <div class="check-group">
+              <label class="check-item">
+                <input type="checkbox" id="sc-sonar" checked>
+                <div class="check-item-text">
+                  <strong>SonarQube</strong>
+                  <span>Static code quality analysis and coverage gates</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="sc-sast" checked>
+                <div class="check-item-text">
+                  <strong>SAST (GitLab)</strong>
+                  <span>GitLab built-in static application security testing</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="sc-dep" checked>
+                <div class="check-item-text">
+                  <strong>Dependency Scan</strong>
+                  <span>Scan third-party libraries for known CVEs</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="sc-secret" checked>
+                <div class="check-item-text">
+                  <strong>Secret Detection</strong>
+                  <span>Prevent committing passwords, tokens, or API keys</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="sc-trivy" checked>
+                <div class="check-item-text">
+                  <strong>Trivy Container Scan</strong>
+                  <span>Scan Docker image for OS & library vulnerabilities</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" id="sc-iac">
+                <div class="check-item-text">
+                  <strong>IaC Scan (Checkov)</strong>
+                  <span>Analyse Terraform, Helm, and Kubernetes manifests</span>
+                </div>
+              </label>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Container →</button>
+            </div>
+          </div>
+
+          <!-- STEP 5: CONTAINER BUILD -->
+          <div class="step-pane" id="step-4">
+            <h2>Container Build</h2>
+            <p class="step-desc">Configure Docker image build settings.</p>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Docker Enabled</label>
+                <select class="input" id="dockerEnabled">
+                  <option>Yes</option><option>No</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Dockerfile Path</label>
+                <input class="input" id="dockerfilePath" value="Dockerfile">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Image Tag Strategy</label>
+                <select class="input" id="tagStrategy">
+                  <option>CI_COMMIT_SHORT_SHA</option>
+                  <option>semantic-version</option>
+                  <option>latest</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Base Image</label>
+                <select class="input" id="baseImage">
+                  <option>eclipse-temurin:17-jre-alpine</option>
+                  <option>eclipse-temurin:21-jre-alpine</option>
+                  <option>distroless/java17</option>
+                  <option>custom</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>Multi-stage Build</label>
+              <select class="input" id="multistage">
+                <option>Yes — builder + runtime stages</option>
+                <option>No — single stage</option>
+              </select>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Registry →</button>
+            </div>
+          </div>
+
+          <!-- STEP 6: REGISTRY -->
+          <div class="step-pane" id="step-5">
+            <h2>Container Registry</h2>
+            <p class="step-desc">Where will Docker images be pushed?</p>
+            <div class="check-group">
+              <label class="check-item">
+                <input type="radio" name="registry" value="gitlab" checked>
+                <div class="check-item-text">
+                  <strong>GitLab Container Registry</strong>
+                  <span>Built-in registry — zero additional credentials required</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="registry" value="nexus">
+                <div class="check-item-text">
+                  <strong>Nexus Repository</strong>
+                  <span>On-premise registry for air-gapped environments</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="registry" value="artifactory">
+                <div class="check-item-text">
+                  <strong>JFrog Artifactory</strong>
+                  <span>Enterprise artifact management with advanced scanning</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="registry" value="ecr">
+                <div class="check-item-text">
+                  <strong>AWS ECR</strong>
+                  <span>Elastic Container Registry for AWS workloads</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="registry" value="gcr">
+                <div class="check-item-text">
+                  <strong>GCP Artifact Registry</strong>
+                  <span>Google Cloud managed registry</span>
+                </div>
+              </label>
+            </div>
+            <div class="form-row" style="margin-top:16px;">
+              <label>Registry URL (override)</label>
+              <input class="input" id="registryUrl" placeholder="registry.company.com (leave blank for auto)">
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Deployment →</button>
+            </div>
+          </div>
+
+          <!-- STEP 7: DEPLOYMENT TARGET -->
+          <div class="step-pane" id="step-6">
+            <h2>Deployment Target</h2>
+            <p class="step-desc">Choose the target platform for deployments.</p>
+            <div class="check-group">
+              <label class="check-item">
+                <input type="radio" name="deploy" value="openshift" checked>
+                <div class="check-item-text">
+                  <strong>Red Hat OpenShift</strong>
+                  <span>Enterprise Kubernetes with RBAC, Routes, and SCC policies</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="deploy" value="kubernetes">
+                <div class="check-item-text">
+                  <strong>Kubernetes (vanilla)</strong>
+                  <span>Plain K8s with kubectl — bring your own manifests</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="deploy" value="helm">
+                <div class="check-item-text">
+                  <strong>Helm Chart Deploy</strong>
+                  <span>Deploy via Helm with values override per environment</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="deploy" value="argocd">
+                <div class="check-item-text">
+                  <strong>ArgoCD (GitOps)</strong>
+                  <span>Sync Kubernetes resources through GitOps — image tag commit only</span>
+                </div>
+              </label>
+              <label class="check-item">
+                <input type="radio" name="deploy" value="eks">
+                <div class="check-item-text">
+                  <strong>AWS EKS</strong>
+                  <span>Elastic Kubernetes Service with IAM role authentication</span>
+                </div>
+              </label>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Cluster →</button>
+            </div>
+          </div>
+
+          <!-- STEP 8: CLUSTER CONFIG -->
+          <div class="step-pane" id="step-7">
+            <h2>Cluster Configuration</h2>
+            <p class="step-desc">Target cluster and namespace details.</p>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Cluster Name / API URL</label>
+                <input class="input" id="clusterName" value="openshift-prod-01">
+              </div>
+              <div class="form-row">
+                <label>Namespace</label>
+                <input class="input" id="namespace" value="payments-prod">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Route / Ingress Host</label>
+                <input class="input" id="routeHost" value="payments.apps.company.com">
+              </div>
+              <div class="form-row">
+                <label>Replicas</label>
+                <input class="input" id="replicas" value="3" type="number" min="1" max="20">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>CPU Request</label>
+                <input class="input" id="cpuReq" value="250m">
+              </div>
+              <div class="form-row">
+                <label>Memory Request</label>
+                <input class="input" id="memReq" value="512Mi">
+              </div>
+            </div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label>CPU Limit</label>
+                <input class="input" id="cpuLim" value="1">
+              </div>
+              <div class="form-row">
+                <label>Memory Limit</label>
+                <input class="input" id="memLim" value="1Gi">
+              </div>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Secrets →</button>
+            </div>
+          </div>
+
+          <!-- STEP 9: SECRETS -->
+          <div class="step-pane" id="step-8">
+            <h2>Secrets Management</h2>
+            <p class="step-desc">How should the pipeline access sensitive credentials?</p>
+            <div class="form-row">
+              <label>Secret Source</label>
+              <select class="input" id="secretSource" onchange="toggleSecretSource()">
+                <option>GitLab Variables</option>
+                <option>HashiCorp Vault</option>
+                <option>Internal CSM</option>
+                <option>AWS Secrets Manager</option>
+              </select>
+            </div>
+            <div id="vaultSection" style="display:none;">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>Vault URL</label>
+                  <input class="input" value="https://vault.company.com">
+                </div>
+                <div class="form-row">
+                  <label>Auth Method</label>
+                  <select class="input"><option>JWT/OIDC</option><option>AppRole</option><option>Token</option></select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label>Secret Path</label>
+                <input class="input" value="secret/data/apps/payments/prod">
+              </div>
+            </div>
+            <div id="csmSection" style="display:none;">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>CSM URL</label>
+                  <input class="input" value="https://internal-csm.company.com">
+                </div>
+                <div class="form-row">
+                  <label>Auth Type</label>
+                  <select class="input"><option>Token</option><option>Client Credentials</option></select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label>Secret Path</label>
+                <input class="input" value="/apps/payments/prod/db">
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="toast('✅ CSM connection successful')">Test Connection</button>
+            </div>
+            <div id="awsSection" style="display:none;">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label>AWS Region</label>
+                  <input class="input" value="us-east-1">
+                </div>
+                <div class="form-row">
+                  <label>IAM Role ARN</label>
+                  <input class="input" placeholder="arn:aws:iam::123:role/pipeline-role">
+                </div>
+              </div>
+            </div>
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <button class="btn btn-primary" onclick="nextStep()">Next: Review →</button>
+            </div>
+          </div>
+
+          <!-- STEP 10: REVIEW & GENERATE -->
+          <div class="step-pane" id="step-9">
+            <h2>Review & Generate</h2>
+            <p class="step-desc">Verify your configuration and download the complete pipeline YAML.</p>
+
+            <!-- Pipeline Visual -->
+            <div class="pipeline-visual" id="pipelineVisual"></div>
+
+            <!-- Config Summary -->
+            <div class="review-grid" id="reviewGrid"></div>
+
+            <!-- YAML Tabs -->
+            <div style="margin-top:20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <strong style="font-size:14px;">Generated Pipeline YAML</strong>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-secondary btn-sm" onclick="copyYaml()">📋 Copy YAML</button>
+                  <button class="btn btn-secondary btn-sm" onclick="downloadCurrent()">⬇ YAML only</button>
+                  <button class="btn btn-success btn-sm" onclick="downloadAllZip()">📦 Download ZIP</button>
+                </div>
+              </div>
+              <div class="yaml-tabs" id="yamlTabs"></div>
+              <div class="yaml-box"><pre class="yaml" id="yamlOutput"></pre></div>
+            </div>
+
+            <!-- Download All -->
+            <div style="margin-top:28px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+                <div>
+                  <strong style="font-size:14px;">📦 Download Pipeline Package</strong>
+                  <p style="font-size:12px;color:var(--muted);margin-top:4px;">
+                    Each download includes <code>.gitlab-ci.yml</code> + all security template YAMLs (sonar, trivy, checkov, etc.) as a ZIP bundle ready to drop into your repo.
+                  </p>
+                </div>
+                <button class="btn btn-primary" onclick="downloadAllZip()" style="flex-shrink:0;">⬇ Download Selected Language ZIP</button>
+              </div>
+              <div class="download-grid" id="downloadGrid"></div>
+            </div>
+
+            <div class="step-footer">
+              <button class="btn btn-secondary" onclick="prevStep()">← Previous</button>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary" onclick="toast('✅ Template saved to library')">💾 Save Template</button>
+                <button class="btn btn-primary" onclick="toast('🚀 GitLab pipeline created successfully!')">🔗 Create in GitLab</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /step-panel -->
+      </div><!-- /wizard-grid -->
+    </div><!-- /page-body / page-pipeline -->
+
+    <!-- ═══ PAGE: DASHBOARD ═══ -->
+    <div id="page-dashboard" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: APP ONBOARDING ═══ -->
+    <div id="page-onboarding" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: APPLICATIONS ═══ -->
+    <div id="page-applications" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: CLUSTERS ═══ -->
+    <div id="page-clusters" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: SECRETS ═══ -->
+    <div id="page-secrets" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: APPROVALS ═══ -->
+    <div id="page-approvals" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: AUDIT LOGS ═══ -->
+    <div id="page-auditlogs" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: ADMIN ═══ -->
+    <div id="page-admin" class="page-body" style="display:none;"></div>
+
+    <!-- ═══ PAGE: SETTINGS ═══ -->
+    <div id="page-settings" class="page-body" style="display:none;"></div>
+
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// SPA ROUTER
+// ─────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:    '📊 Dashboard',
+  pipeline:     '🚀 Pipeline Builder Wizard',
+  onboarding:   '🆕 App Onboarding',
+  applications: '📦 Applications',
+  clusters:     '☸️ Clusters',
+  secrets:      '🔑 Secrets Management',
+  approvals:    '✅ Approvals',
+  auditlogs:    '📋 Audit Logs',
+  admin:        '🛠 Admin',
+  settings:     '⚙️ Settings',
+};
+
+function navTo(page) {
+  // Hide all pages
+  document.querySelectorAll('[id^="page-"]').forEach(el => el.style.display = 'none');
+  // Show target
+  const target = document.getElementById('page-' + page);
+  if (target) target.style.display = '';
+  // Update topbar title
+  document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
+  // Update sidebar active state
+  document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  // Scroll to top
+  window.scrollTo({top:0,behavior:'smooth'});
+  return false; // prevent href="#" scroll
+}
+
+// Toggle switch animation fix
+document.addEventListener('click', function(e) {
+  const tog = e.target.closest('[class*="tog"]');
+  if (!tog) return;
+  const dot = tog.querySelector('div');
+  if (!dot) return;
+  const isOn = tog.classList.contains('tog-on');
+  dot.style.left = isOn ? '23px' : '3px';
+});
+
+
+let currentStep = 0;
+const TOTAL_STEPS = 10;
+
+function showStep(idx) {
+  document.querySelectorAll('.step-pane').forEach((p,i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.step-nav-item').forEach((n,i) => {
+    n.classList.toggle('active', i === idx);
+    if (i < idx) n.classList.add('done'); else n.classList.remove('done');
+  });
+  currentStep = idx;
+  if (idx === 9) renderReview();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function nextStep(){ if(currentStep < TOTAL_STEPS-1) showStep(currentStep+1); }
+function prevStep(){ if(currentStep > 0) showStep(currentStep-1); }
+
+// ─────────────────────────────────────────────
+// LANGUAGE SELECTION
+// ─────────────────────────────────────────────
+let selectedLang = 'java';
+const LANG_BUILD_OPTS = {
+  java:   {
+    tools:['Maven','Gradle'],
+    toolLabel:'Build Tool',
+    pkg:['JAR','WAR','EAR'],
+    pkgLabel:'Packaging',
+    rt:['17 (LTS)','21 (LTS)','11'],
+    rtLabel:'JDK Version',
+    desc:'Maven/Gradle · JAR/WAR/EAR · JDK 11/17/21',
+    baseImages:['eclipse-temurin:17-jre-alpine','eclipse-temurin:21-jre-alpine','distroless/java17','custom'],
+  },
+  nodejs: {
+    tools:['npm','yarn','pnpm'],
+    toolLabel:'Package Manager',
+    pkg:['None (JS bundle)','CommonJS','ESM'],
+    pkgLabel:'Module Format',
+    rt:['20 LTS','18 LTS','22'],
+    rtLabel:'Node Version',
+    desc:'npm/yarn/pnpm · CommonJS/ESM · Node 18/20/22',
+    baseImages:['node:20-alpine','node:18-alpine','node:22-alpine','custom'],
+  },
+  python: {
+    tools:['pip','poetry','uv'],
+    toolLabel:'Package Manager',
+    pkg:['wheel','sdist','none'],
+    pkgLabel:'Distribution Format',
+    rt:['3.12','3.11','3.10'],
+    rtLabel:'Python Version',
+    desc:'pip/poetry/uv · wheel/sdist · Python 3.10–3.12',
+    baseImages:['python:3.12-slim','python:3.11-slim','python:3.10-slim','custom'],
+  },
+  go:     {
+    tools:['go build','goreleaser'],
+    toolLabel:'Build Tool',
+    pkg:['binary','archive (tar.gz)'],
+    pkgLabel:'Output Format',
+    rt:['1.22','1.21','1.20'],
+    rtLabel:'Go Version',
+    desc:'go build/goreleaser · Linux binary · Go 1.20–1.22',
+    baseImages:['golang:1.22-alpine','gcr.io/distroless/base','scratch','custom'],
+  },
+  dotnet: {
+    tools:['dotnet CLI','MSBuild'],
+    toolLabel:'Build Tool',
+    pkg:['DLL','exe','NuGet package'],
+    pkgLabel:'Output Type',
+    rt:['.NET 8','.NET 6 LTS','.NET 7'],
+    rtLabel:'.NET SDK Version',
+    desc:'dotnet CLI/MSBuild · DLL/exe · .NET 6/7/8',
+    baseImages:['mcr.microsoft.com/dotnet/aspnet:8.0','mcr.microsoft.com/dotnet/aspnet:6.0','custom'],
+  },
+};
+
+function selectLang(lang) {
+  selectedLang = lang;
+  document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('lc-'+lang).classList.add('selected');
+
+  const opt = LANG_BUILD_OPTS[lang] || LANG_BUILD_OPTS.java;
+  const meta = LANG_META[lang] || LANG_META.java;
+
+  document.getElementById('buildTool').innerHTML   = opt.tools.map(t=>`<option>${t}</option>`).join('');
+  document.getElementById('packaging').innerHTML   = opt.pkg.map(p=>`<option>${p}</option>`).join('');
+  document.getElementById('runtimeVersion').innerHTML = opt.rt.map(r=>`<option>${r}</option>`).join('');
+
+  // Update labels
+  document.getElementById('buildToolLabel').textContent = opt.toolLabel;
+  document.getElementById('packagingLabel').textContent = opt.pkgLabel;
+  document.getElementById('runtimeLabel').textContent   = opt.rtLabel;
+
+  // Update base image options
+  const bi = document.getElementById('baseImage');
+  if(bi) bi.innerHTML = opt.baseImages.map(i=>`<option>${i}</option>`).join('');
+
+  // Update info banner
+  document.getElementById('lang-banner-icon').textContent  = meta.icon;
+  document.getElementById('lang-banner-title').textContent = meta.label;
+  document.getElementById('lang-banner-desc').textContent  = opt.desc;
+
+  // Update banner border color to match language accent
+  const banner = document.getElementById('lang-info-banner');
+  if(banner) {
+    const colors = {java:'rgba(249,115,22,.3)',nodejs:'rgba(34,197,94,.3)',python:'rgba(250,204,21,.3)',go:'rgba(6,182,212,.3)',dotnet:'rgba(139,92,246,.3)'};
+    const bgs    = {java:'rgba(249,115,22,.08)',nodejs:'rgba(34,197,94,.08)',python:'rgba(250,204,21,.08)',go:'rgba(6,182,212,.08)',dotnet:'rgba(139,92,246,.08)'};
+    const titleColors = {java:'#fdba74',nodejs:'#86efac',python:'#fde68a',go:'#22d3ee',dotnet:'#c4b5fd'};
+    banner.style.borderColor = colors[lang]||colors.java;
+    banner.style.background  = bgs[lang]||bgs.java;
+    document.getElementById('lang-banner-title').style.color = titleColors[lang]||'#60a5fa';
+  }
+}
+
+// ─────────────────────────────────────────────
+// SECRET SOURCE TOGGLE
+// ─────────────────────────────────────────────
+function toggleSecretSource() {
+  const v = document.getElementById('secretSource').value;
+  document.getElementById('vaultSection').style.display = v==='HashiCorp Vault' ? 'block':'none';
+  document.getElementById('csmSection').style.display   = v==='Internal CSM'    ? 'block':'none';
+  document.getElementById('awsSection').style.display   = v==='AWS Secrets Manager' ? 'block':'none';
+}
+
+// ─────────────────────────────────────────────
+// GATHER CONFIG
+// ─────────────────────────────────────────────
+function getConfig() {
+  const v = id => document.getElementById(id)?.value||'';
+  const ch = id => document.getElementById(id)?.checked||false;
+  const rd = name => document.querySelector(`input[name="${name}"]:checked`)?.value||'';
+  return {
+    project:     v('projectName')||'my-service',
+    team:        v('teamName')||'platform-team',
+    repo:        v('repoUrl'),
+    branch:      v('branch')||'main',
+    env:         v('environment')||'prod',
+    lifecycle:   rd('life')||'new',
+    lang:        selectedLang,
+    buildTool:   v('buildTool')||'Maven',
+    packaging:   v('packaging')||'JAR',
+    runtime:     v('runtimeVersion')||'17 (LTS)',
+    sonar:       ch('sc-sonar'),
+    sast:        ch('sc-sast'),
+    depScan:     ch('sc-dep'),
+    secretScan:  ch('sc-secret'),
+    trivy:       ch('sc-trivy'),
+    iac:         ch('sc-iac'),
+    docker:      v('dockerEnabled')==='Yes',
+    dockerfile:  v('dockerfilePath')||'Dockerfile',
+    tagStrategy: v('tagStrategy')||'CI_COMMIT_SHORT_SHA',
+    baseImage:   v('baseImage')||'eclipse-temurin:17-jre-alpine',
+    multistage:  v('multistage')||'Yes',
+    registry:    rd('registry')||'gitlab',
+    registryUrl: v('registryUrl'),
+    deploy:      rd('deploy')||'openshift',
+    cluster:     v('clusterName')||'cluster-01',
+    namespace:   v('namespace')||'default',
+    routeHost:   v('routeHost'),
+    replicas:    v('replicas')||'3',
+    cpuReq:      v('cpuReq')||'250m',
+    memReq:      v('memReq')||'512Mi',
+    cpuLim:      v('cpuLim')||'1',
+    memLim:      v('memLim')||'1Gi',
+    secretSrc:   v('secretSource')||'GitLab Variables',
+  };
+}
+
+// ─────────────────────────────────────────────
+// YAML GENERATORS — one per language
+// ─────────────────────────────────────────────
+const LANG_META = {
+  java:   {icon:'☕', label:'Java',    color:'#f97316'},
+  nodejs: {icon:'🟢', label:'Node.js', color:'#22c55e'},
+  python: {icon:'🐍', label:'Python',  color:'#facc15'},
+  go:     {icon:'🐹', label:'Go',      color:'#06b6d4'},
+  dotnet: {icon:'🔷', label:'.NET',    color:'#8b5cf6'},
+};
+
+function buildSecurityBlock(c) {
+  const lines = [];
+  if(c.sonar)      lines.push('  - project: platform/templates\n    file: security/sonar.yml');
+  if(c.sast)       lines.push('  - template: Jobs/SAST.gitlab-ci.yml');
+  if(c.depScan)    lines.push('  - template: Jobs/Dependency-Scanning.gitlab-ci.yml');
+  if(c.secretScan) lines.push('  - template: Jobs/Secret-Detection.gitlab-ci.yml');
+  if(c.trivy)      lines.push('  - project: platform/templates\n    file: security/trivy.yml');
+  if(c.iac)        lines.push('  - project: platform/templates\n    file: security/checkov.yml');
+  return lines.length ? '\n' + lines.join('\n') : '';
+}
+
+function buildDeployBlock(c) {
+  const deploys = {
+    openshift: `
+openshift_deploy:
+  image: quay.io/openshift/origin-cli:latest
+  stage: deploy
+  environment:
+    name: ${c.env}
+    url: https://${c.routeHost||c.project+'.apps.company.com'}
+  before_script:
+    - oc login "$OPENSHIFT_API" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+    - oc project ${c.namespace}
+  script:
+    - oc set image deployment/${c.project} app=$IMAGE_FULL --record
+    - oc rollout status deployment/${c.project} --timeout=5m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    kubernetes: `
+kubectl_deploy:
+  image: bitnami/kubectl:latest
+  stage: deploy
+  environment:
+    name: ${c.env}
+  script:
+    - kubectl config use-context $KUBE_CONTEXT
+    - kubectl set image deployment/${c.project} app=$IMAGE_FULL -n ${c.namespace}
+    - kubectl rollout status deployment/${c.project} -n ${c.namespace}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    helm: `
+helm_deploy:
+  image: alpine/helm:3.14.0
+  stage: deploy
+  environment:
+    name: ${c.env}
+  script:
+    - helm upgrade --install ${c.project} ./charts/${c.project}
+        --namespace ${c.namespace}
+        --set image.tag=$IMAGE_TAG
+        --set replicas=${c.replicas}
+        --set resources.requests.cpu=${c.cpuReq}
+        --set resources.requests.memory=${c.memReq}
+        -f charts/${c.project}/values-${c.env}.yaml
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    argocd: `
+argocd_sync:
+  image: argoproj/argocd:latest
+  stage: deploy
+  script:
+    - argocd login "$ARGOCD_SERVER" --auth-token="$ARGOCD_TOKEN" --grpc-web
+    - |
+      yq e '.spec.source.helm.parameters[] |= select(.name == "image.tag").value = strenv(IMAGE_TAG)' \\
+        -i gitops/${c.project}/values.yaml
+    - git commit -am "ci: bump ${c.project} image to $IMAGE_TAG" && git push
+    - argocd app sync ${c.project} --timeout 300
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    eks: `
+eks_deploy:
+  image: amazon/aws-cli:latest
+  stage: deploy
+  before_script:
+    - aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER"
+  script:
+    - kubectl set image deployment/${c.project} app=$IMAGE_FULL -n ${c.namespace}
+    - kubectl rollout status deployment/${c.project} -n ${c.namespace}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+  };
+  return deploys[c.deploy]||deploys.openshift;
+}
+
+function buildDockerBlock(c) {
+  if(!c.docker) return '';
+  const regMap = {gitlab:'$CI_REGISTRY',nexus:'$NEXUS_URL',artifactory:'$ARTIFACTORY_URL',ecr:'$ECR_REGISTRY',gcr:'$GCR_REGISTRY'};
+  const reg = c.registryUrl || regMap[c.registry] || '$REGISTRY_URL';
+  return `
+docker_build:
+  image: docker:26
+  stage: docker
+  services:
+    - docker:26-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+    IMAGE_FULL: ${reg}/${c.project}:$IMAGE_TAG
+  before_script:
+    - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "${reg}"
+  script:
+    - docker build -f ${c.dockerfile} -t $IMAGE_FULL .
+    - docker push $IMAGE_FULL
+  rules:
+    - if: '$CI_COMMIT_BRANCH'`;
+}
+
+const YAMLS = {
+  java: c => `# ═══════════════════════════════════════════════════════════
+# GitLab CI/CD Pipeline — Java / ${c.buildTool}
+# Project  : ${c.project}
+# Team     : ${c.team}
+# Target   : ${c.deploy} / ${c.namespace}
+# Generated: ${new Date().toISOString().slice(0,10)}
+# ═══════════════════════════════════════════════════════════
+
+include:${buildSecurityBlock(c)}
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2"
+  JAVA_VERSION: "${c.runtime.replace(' (LTS)','')}"
+  PROJECT_NAME: "${c.project}"
+  NAMESPACE: "${c.namespace}"
+
+stages:
+  - build
+  - test
+  - scan
+  - docker
+  - deploy
+
+# ── BUILD ───────────────────────────────────────────────────
+maven_build:
+  image: maven:3.9.6-eclipse-temurin-${c.runtime.includes('21')?'21':'17'}
+  stage: build
+  cache:
+    key: "$CI_PROJECT_PATH-m2"
+    paths:
+      - .m2/repository
+  script:
+    - mvn clean package -DskipTests --batch-mode
+  artifacts:
+    name: "${c.project}-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - target/*.jar
+      - target/*.war
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+
+# ── TEST ────────────────────────────────────────────────────
+unit_tests:
+  image: maven:3.9.6-eclipse-temurin-${c.runtime.includes('21')?'21':'17'}
+  stage: test
+  cache:
+    key: "$CI_PROJECT_PATH-m2"
+    paths:
+      - .m2/repository
+    policy: pull
+  script:
+    - mvn test --batch-mode
+  artifacts:
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+    paths:
+      - target/site/jacoco
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+${buildDockerBlock(c)}
+${buildDeployBlock(c)}`,
+
+  nodejs: c => `# ═══════════════════════════════════════════════════════════
+# GitLab CI/CD Pipeline — Node.js / ${c.buildTool}
+# Project  : ${c.project}
+# Team     : ${c.team}
+# Target   : ${c.deploy} / ${c.namespace}
+# Generated: ${new Date().toISOString().slice(0,10)}
+# ═══════════════════════════════════════════════════════════
+
+include:${buildSecurityBlock(c)}
+
+variables:
+  NODE_ENV: "production"
+  PROJECT_NAME: "${c.project}"
+  NAMESPACE: "${c.namespace}"
+
+stages:
+  - install
+  - build
+  - test
+  - scan
+  - docker
+  - deploy
+
+# ── INSTALL ─────────────────────────────────────────────────
+install_deps:
+  image: node:${c.runtime.includes('22')?'22':c.runtime.includes('18')?'18':'20'}-alpine
+  stage: install
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  script:
+    - ${c.buildTool==='yarn'?'yarn install --frozen-lockfile':c.buildTool==='pnpm'?'pnpm install --frozen-lockfile':'npm ci'}
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+
+# ── BUILD ───────────────────────────────────────────────────
+npm_build:
+  image: node:${c.runtime.includes('22')?'22':c.runtime.includes('18')?'18':'20'}-alpine
+  stage: build
+  script:
+    - ${c.buildTool==='yarn'?'yarn build':c.buildTool==='pnpm'?'pnpm build':'npm run build'}
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+
+# ── TEST ────────────────────────────────────────────────────
+unit_tests:
+  image: node:${c.runtime.includes('22')?'22':c.runtime.includes('18')?'18':'20'}-alpine
+  stage: test
+  script:
+    - ${c.buildTool==='yarn'?'yarn test --ci':'npm test -- --ci --coverage'}
+  artifacts:
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+  coverage: '/Statements.*?([0-9]{1,3})%/'
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+${buildDockerBlock(c)}
+${buildDeployBlock(c)}`,
+
+  python: c => `# ═══════════════════════════════════════════════════════════
+# GitLab CI/CD Pipeline — Python / ${c.buildTool}
+# Project  : ${c.project}
+# Team     : ${c.team}
+# Target   : ${c.deploy} / ${c.namespace}
+# Generated: ${new Date().toISOString().slice(0,10)}
+# ═══════════════════════════════════════════════════════════
+
+include:${buildSecurityBlock(c)}
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHON_VERSION: "${c.runtime.replace('Python ','')}"
+  PROJECT_NAME: "${c.project}"
+  NAMESPACE: "${c.namespace}"
+
+stages:
+  - install
+  - lint
+  - test
+  - scan
+  - docker
+  - deploy
+
+# ── INSTALL ─────────────────────────────────────────────────
+install_deps:
+  image: python:${c.runtime.split(' ')[0].replace('3.','3.')}-slim
+  stage: install
+  cache:
+    key: "$CI_PROJECT_PATH-pip"
+    paths:
+      - .cache/pip
+      - .venv/
+  script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - ${c.buildTool==='poetry'?'pip install poetry && poetry install':'pip install -r requirements.txt'}
+  artifacts:
+    paths:
+      - .venv/
+    expire_in: 1 hour
+
+# ── LINT ────────────────────────────────────────────────────
+lint:
+  image: python:${c.runtime.split(' ')[0]}-slim
+  stage: lint
+  script:
+    - source .venv/bin/activate
+    - pip install flake8 black isort
+    - flake8 . --max-line-length=120
+    - black --check .
+  allow_failure: true
+
+# ── TEST ────────────────────────────────────────────────────
+unit_tests:
+  image: python:${c.runtime.split(' ')[0]}-slim
+  stage: test
+  script:
+    - source .venv/bin/activate
+    - pip install pytest pytest-cov
+    - pytest --cov=. --cov-report=xml --junitxml=junit.xml -v
+  artifacts:
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  coverage: '/TOTAL.*? (\\d+%)$/'
+${buildDockerBlock(c)}
+${buildDeployBlock(c)}`,
+
+  go: c => `# ═══════════════════════════════════════════════════════════
+# GitLab CI/CD Pipeline — Go
+# Project  : ${c.project}
+# Team     : ${c.team}
+# Target   : ${c.deploy} / ${c.namespace}
+# Generated: ${new Date().toISOString().slice(0,10)}
+# ═══════════════════════════════════════════════════════════
+
+include:${buildSecurityBlock(c)}
+
+variables:
+  GOPATH: "$CI_PROJECT_DIR/.go"
+  GO_VERSION: "${c.runtime.replace('Go ','')}"
+  CGO_ENABLED: "0"
+  GOOS: "linux"
+  GOARCH: "amd64"
+  PROJECT_NAME: "${c.project}"
+  NAMESPACE: "${c.namespace}"
+
+stages:
+  - build
+  - test
+  - scan
+  - docker
+  - deploy
+
+# ── BUILD ───────────────────────────────────────────────────
+go_build:
+  image: golang:${c.runtime.split(' ')[0]}-alpine
+  stage: build
+  cache:
+    key: "$CI_PROJECT_PATH-go"
+    paths:
+      - .go/pkg/mod
+  script:
+    - go mod download
+    - go build -ldflags="-s -w -X main.version=$CI_COMMIT_SHORT_SHA" -o bin/${c.project} ./cmd/...
+  artifacts:
+    paths:
+      - bin/${c.project}
+    expire_in: 7 days
+
+# ── TEST ────────────────────────────────────────────────────
+go_test:
+  image: golang:${c.runtime.split(' ')[0]}-alpine
+  stage: test
+  script:
+    - go test -v -race -coverprofile=coverage.out ./...
+    - go tool cover -func=coverage.out
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  coverage: '/total:\\s+\\(statements\\)\\s+(\\d+\\.\\d+)%/'
+
+go_lint:
+  image: golangci/golangci-lint:latest
+  stage: test
+  script:
+    - golangci-lint run ./...
+  allow_failure: true
+${buildDockerBlock(c)}
+${buildDeployBlock(c)}`,
+
+  dotnet: c => `# ═══════════════════════════════════════════════════════════
+# GitLab CI/CD Pipeline — .NET / ${c.buildTool}
+# Project  : ${c.project}
+# Team     : ${c.team}
+# Target   : ${c.deploy} / ${c.namespace}
+# Generated: ${new Date().toISOString().slice(0,10)}
+# ═══════════════════════════════════════════════════════════
+
+include:${buildSecurityBlock(c)}
+
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_VERSION: "${c.runtime.replace('.NET ','')}"
+  PROJECT_NAME: "${c.project}"
+  NAMESPACE: "${c.namespace}"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget"
+
+stages:
+  - restore
+  - build
+  - test
+  - scan
+  - docker
+  - deploy
+
+# ── RESTORE ─────────────────────────────────────────────────
+nuget_restore:
+  image: mcr.microsoft.com/dotnet/sdk:${c.runtime.includes('6')?'6.0':c.runtime.includes('7')?'7.0':'8.0'}
+  stage: restore
+  cache:
+    key: "$CI_PROJECT_PATH-nuget"
+    paths:
+      - .nuget/
+  script:
+    - dotnet restore --packages "$NUGET_PACKAGES"
+
+# ── BUILD ───────────────────────────────────────────────────
+dotnet_build:
+  image: mcr.microsoft.com/dotnet/sdk:${c.runtime.includes('6')?'6.0':c.runtime.includes('7')?'7.0':'8.0'}
+  stage: build
+  script:
+    - dotnet build --configuration Release --no-restore
+    - dotnet publish --configuration Release --output publish/
+  artifacts:
+    paths:
+      - publish/
+    expire_in: 7 days
+
+# ── TEST ────────────────────────────────────────────────────
+unit_tests:
+  image: mcr.microsoft.com/dotnet/sdk:${c.runtime.includes('6')?'6.0':c.runtime.includes('7')?'7.0':'8.0'}
+  stage: test
+  script:
+    - dotnet test --configuration Release --no-build
+        --logger "junit;LogFilePath=junit.xml"
+        --collect:"XPlat Code Coverage"
+  artifacts:
+    reports:
+      junit: "**/junit.xml"
+      coverage_report:
+        coverage_format: cobertura
+        path: "**/coverage.cobertura.xml"
+  coverage: '/Line coverage: (\\d+\\.\\d+)%/'
+${buildDockerBlock(c)}
+${buildDeployBlock(c)}`,
+};
+
+// ─────────────────────────────────────────────
+// RENDER REVIEW PAGE
+// ─────────────────────────────────────────────
+const ALL_LANGS = ['java','nodejs','python','go','dotnet'];
+let activeYamlLang = null;
+
+function renderReview() {
+  const c = getConfig();
+  activeYamlLang = c.lang;
+
+  // Pipeline visual
+  const stages = [
+    {icon:'🔨',label:'Build',cls:'pi-build'},
+    {icon:'🧪',label:'Test',cls:'pi-test'},
+    {icon:'🔍',label:'Scan',cls:'pi-scan'},
+    c.docker?{icon:'🐳',label:'Docker',cls:'pi-docker'}:null,
+    {icon:'🚀',label:'Deploy',cls:'pi-deploy'},
+  ].filter(Boolean);
+
+  document.getElementById('pipelineVisual').innerHTML = stages.map((s,i) =>
+    `${i>0?'<span class="pipe-arrow">→</span>':''}
+     <div class="pipe-stage">
+       <div class="pipe-icon ${s.cls}">${s.icon}</div>
+       <div class="pipe-label">${s.label}</div>
+     </div>`
+  ).join('');
+
+  // Summary grid
+  const langMeta = LANG_META[c.lang];
+  const secList = [c.sonar&&'SonarQube',c.sast&&'SAST',c.depScan&&'Dep Scan',c.secretScan&&'Secrets',c.trivy&&'Trivy',c.iac&&'IaC'].filter(Boolean);
+  document.getElementById('reviewGrid').innerHTML = [
+    ['Project',c.project],['Team',c.team],
+    ['Language',`${langMeta.icon} ${langMeta.label}`],['Build Tool',c.buildTool],
+    ['Runtime',c.runtime],['Environment',c.env.toUpperCase()],
+    ['Deployment',c.deploy.toUpperCase()],['Namespace',c.namespace],
+    ['Replicas',c.replicas],['Registry',c.registry.toUpperCase()],
+    ['Secrets',c.secretSrc],['Security',secList.join(', ')||'None'],
+  ].map(([k,v])=>`
+    <div class="review-card">
+      <div class="rc-label">${k}</div>
+      <div class="rc-val">${v}</div>
+    </div>`).join('');
+
+  // YAML tabs — current lang + all langs
+  renderYamlTabs(c);
+
+  // Download grid — only show the selected language
+  const secCount = [c.sonar,c.trivy,c.iac,c.sast,c.depScan,c.secretScan].filter(Boolean).length;
+  const m = LANG_META[c.lang];
+  document.getElementById('downloadGrid').innerHTML = `<div class="dl-card">
+    <div style="font-size:24px;">${m.icon}</div>
+    <div>
+      <div class="dl-lang">${m.label} <span class="badge badge-blue" style="font-size:10px;">selected</span></div>
+      <div class="dl-sub">${getBuildToolHint(c.lang)}</div>
+      <div class="dl-sub" style="margin-top:4px;color:#4ade80;">📦 ZIP: gitlab-ci.yml${secCount>0?' + '+secCount+' security YAMLs':''} + README</div>
+    </div>
+    <button class="btn btn-success btn-sm" style="width:100%;" onclick="downloadLang('${c.lang}')">⬇ Download ZIP</button>
+  </div>`;
+}
+
+function getBuildToolHint(lang){
+  return {java:'Maven / Gradle',nodejs:'npm / yarn / pnpm',python:'pip / poetry / uv',go:'go build / goreleaser',dotnet:'dotnet CLI / MSBuild'}[lang]||'';
+}
+
+function renderYamlTabs(c) {
+  // Only show the selected language tab — no cross-language switching
+  const m = LANG_META[c.lang];
+  document.getElementById('yamlTabs').innerHTML =
+    `<div class="yaml-tab active" id="tab-${c.lang}">${m.icon} ${m.label}</div>`;
+  activeYamlLang = c.lang;
+  renderYaml(c.lang);
+}
+
+function switchYamlTab(lang) {
+  activeYamlLang = lang;
+  document.querySelectorAll('.yaml-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-'+lang)?.classList.add('active');
+  renderYaml(lang);
+}
+
+function renderYaml(lang) {
+  const c = getConfig();
+  const gen = YAMLS[lang] || YAMLS.java;
+  const yaml = gen(c);
+  document.getElementById('yamlOutput').textContent = yaml;
+}
+
+function getActiveYaml() {
+  const c = getConfig();
+  const lang = activeYamlLang || c.lang;
+  return { yaml:(YAMLS[lang]||YAMLS.java)(c), lang };
+}
+
+// ─────────────────────────────────────────────
+// SECURITY YAML TEMPLATES
+// ─────────────────────────────────────────────
+function buildSonarYaml(c) {
+  return `# ══════════════════════════════════════════════
+# SonarQube Analysis Template
+# Project : ${c.project}
+# ══════════════════════════════════════════════
+
+sonarqube_scan:
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  stage: scan
+  variables:
+    SONAR_HOST_URL: "$SONAR_HOST_URL"
+    SONAR_TOKEN: "$SONAR_TOKEN"
+    SONAR_USER_HOME: "$CI_PROJECT_DIR/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "\${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+        -Dsonar.projectKey=${c.project}
+        -Dsonar.projectName="${c.project}"
+        -Dsonar.sources=.
+        -Dsonar.host.url=$SONAR_HOST_URL
+        -Dsonar.login=$SONAR_TOKEN
+        -Dsonar.qualitygate.wait=true
+  allow_failure: false
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+`;
+}
+
+function buildTrivyYaml(c) {
+  const regMap = {gitlab:'$CI_REGISTRY_IMAGE',nexus:'$NEXUS_URL/${c.project}',artifactory:'$ARTIFACTORY_URL/${c.project}',ecr:'$ECR_REGISTRY/${c.project}',gcr:'$GCR_REGISTRY/${c.project}'};
+  const img = c.registryUrl ? `${c.registryUrl}/${c.project}` : (regMap[c.registry]||'$REGISTRY_URL/${c.project}');
+  return `# ══════════════════════════════════════════════
+# Trivy Container Security Scan Template
+# Project : ${c.project}
+# ══════════════════════════════════════════════
+
+trivy_scan:
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  stage: scan
+  variables:
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    FULL_IMAGE_NAME: "${img}:$CI_COMMIT_SHORT_SHA"
+  cache:
+    paths:
+      - .trivycache/
+  script:
+    # Filesystem scan (source code & deps)
+    - trivy fs --exit-code 0 --no-progress --format table .
+    # Image scan (blocks on CRITICAL)
+    - trivy image
+        --exit-code 1
+        --severity CRITICAL,HIGH
+        --no-progress
+        --format template
+        --template "@/contrib/gitlab.tpl"
+        --output gl-container-scanning-report.json
+        $FULL_IMAGE_NAME
+  artifacts:
+    when: always
+    reports:
+      container_scanning: gl-container-scanning-report.json
+  allow_failure: false
+  needs:
+    - docker_build
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+`;
+}
+
+function buildCheckovYaml(c) {
+  return `# ══════════════════════════════════════════════
+# Checkov IaC Security Scan Template
+# Project : ${c.project}
+# ══════════════════════════════════════════════
+
+checkov_iac_scan:
+  image: bridgecrew/checkov:latest
+  stage: scan
+  script:
+    # Scan Terraform
+    - checkov -d ./terraform --quiet --compact --output cli --output junitxml
+        --output-file-path . || true
+    # Scan Helm charts
+    - checkov -d ./charts --framework helm --quiet --compact || true
+    # Scan Kubernetes manifests
+    - checkov -d ./k8s --framework kubernetes --quiet --compact || true
+  artifacts:
+    when: always
+    reports:
+      junit: results_junitxml.xml
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+`;
+}
+
+function buildSastYaml() {
+  return `# ══════════════════════════════════════════════
+# GitLab SAST (Static Application Security Testing)
+# Uses GitLab built-in SAST template
+# ══════════════════════════════════════════════
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+
+# Override SAST variables here if needed
+variables:
+  SAST_EXCLUDED_PATHS: "spec, test, tests, tmp, .venv, node_modules"
+  SAST_DISABLE_BABEL: "true"
+`;
+}
+
+function buildDepScanYaml() {
+  return `# ══════════════════════════════════════════════
+# GitLab Dependency Scanning Template
+# Scans third-party libraries for known CVEs
+# ══════════════════════════════════════════════
+
+include:
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+
+variables:
+  DS_EXCLUDED_PATHS: ".venv, node_modules, vendor"
+  DS_MAX_DEPTH: "5"
+`;
+}
+
+function buildSecretDetectYaml() {
+  return `# ══════════════════════════════════════════════
+# GitLab Secret Detection Template
+# Prevents credentials/tokens from being committed
+# ══════════════════════════════════════════════
+
+include:
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+variables:
+  SECRET_DETECTION_EXCLUDED_PATHS: ""
+  SECRET_DETECTION_HISTORIC_SCAN: "false"
+`;
+}
+
+function buildReadme(c, lang) {
+  const meta = LANG_META[lang];
+  const files = ['.gitlab-ci.yml'];
+  if(c.sonar)      files.push('security/sonar.yml');
+  if(c.trivy)      files.push('security/trivy.yml');
+  if(c.iac)        files.push('security/checkov.yml');
+  if(c.sast)       files.push('security/sast.yml');
+  if(c.depScan)    files.push('security/dependency-scanning.yml');
+  if(c.secretScan) files.push('security/secret-detection.yml');
+  files.push('Dockerfile');
+  files.push('k8s/deployment.yaml');
+  files.push('k8s/service.yaml');
+  if(c.deploy === 'openshift') files.push('k8s/route.yaml');
+  if(c.deploy === 'helm') {
+    files.push(`charts/${c.project}/Chart.yaml`);
+    files.push(`charts/${c.project}/values.yaml`);
+    files.push(`charts/${c.project}/values-${c.env}.yaml`);
+  }
+  if(c.sonar) files.push('sonar-project.properties');
+
+  return `# ${c.project} — GitLab CI/CD Pipeline Package
+Generated: ${new Date().toISOString().slice(0,10)}
+
+## Language: ${meta.icon} ${meta.label}
+- Build Tool  : ${c.buildTool}
+- Runtime     : ${c.runtime}
+- Environment : ${c.env.toUpperCase()}
+- Deploy To   : ${c.deploy.toUpperCase()} / ${c.namespace}
+- Registry    : ${c.registry.toUpperCase()}
+- Replicas    : ${c.replicas}
+
+## Files Included
+\`\`\`
+${c.project}-pipeline/
+${files.map(f=>`  ├── ${f}`).join('\n')}
+\`\`\`
+
+## Setup Instructions
+
+1. Copy \`.gitlab-ci.yml\` to the root of your repository.
+2. Place all \`security/*.yml\` files in a shared platform templates project at \`platform/templates\`.
+3. Copy \`k8s/\` manifests (and \`charts/\` if Helm) into your repository.
+4. Replace \`REGISTRY\` placeholder in manifests with your actual registry URL.
+5. Set the following CI/CD variables in your GitLab project:
+
+### Required Variables
+| Variable              | Description                              |
+|-----------------------|------------------------------------------|
+| SONAR_HOST_URL        | SonarQube server URL                     |
+| SONAR_TOKEN           | SonarQube authentication token          |
+| REGISTRY_USER         | Container registry username             |
+| REGISTRY_PASSWORD     | Container registry password             |
+| OPENSHIFT_API / KUBE_CONTEXT | Target cluster credentials       |
+| OPENSHIFT_TOKEN       | Cluster authentication token            |
+
+6. Push to branch \`${c.branch}\` to trigger the pipeline.
+
+## Pipeline Stages
+build → test → scan (sonar/trivy/sast/dep-scan/secret-detect) → docker → deploy
+`;
+}
+
+// ─────────────────────────────────────────────
+// ZIP BUILDER
+// ─────────────────────────────────────────────
+async function buildZip(lang) {
+  if (typeof JSZip === 'undefined') {
+    throw new Error('JSZip library not loaded. Please check your internet connection and reload the page.');
+  }
+  const c = getConfig();
+  const zip = new JSZip();
+  const pipelineYaml = (YAMLS[lang]||YAMLS.java)(c);
+
+  // Main pipeline file at repo root
+  zip.file('.gitlab-ci.yml', pipelineYaml);
+
+  // Security templates folder
+  const sec = zip.folder('security');
+  if(c.sonar)      sec.file('sonar.yml',                buildSonarYaml(c));
+  if(c.trivy)      sec.file('trivy.yml',                buildTrivyYaml(c));
+  if(c.iac)        sec.file('checkov.yml',              buildCheckovYaml(c));
+  if(c.sast)       sec.file('sast.yml',                 buildSastYaml());
+  if(c.depScan)    sec.file('dependency-scanning.yml',  buildDepScanYaml());
+  if(c.secretScan) sec.file('secret-detection.yml',     buildSecretDetectYaml());
+
+  // Dockerfile
+  zip.file('Dockerfile', buildDockerfile(c, lang));
+
+  // k8s / openshift manifests
+  const k8s = zip.folder('k8s');
+  k8s.file('deployment.yaml', buildK8sDeployment(c));
+  k8s.file('service.yaml', buildK8sService(c));
+  if(c.deploy === 'openshift') k8s.file('route.yaml', buildOcpRoute(c));
+
+  // Helm chart skeleton (only if helm deploy)
+  if(c.deploy === 'helm') {
+    const charts = zip.folder(`charts/${c.project}`);
+    charts.file('Chart.yaml', buildHelmChart(c));
+    charts.file('values.yaml', buildHelmValues(c));
+    charts.file(`values-${c.env}.yaml`, buildHelmEnvValues(c));
+  }
+
+  // sonar-project.properties
+  if(c.sonar) zip.file('sonar-project.properties', buildSonarProps(c, lang));
+
+  // README
+  zip.file('README.md', buildReadme(c, lang));
+
+  return zip.generateAsync({type:'blob'});
+}
+
+// ── Extra file builders ──────────────────────────────────────────────────────
+
+function buildDockerfile(c, lang) {
+  const dockerfiles = {
+    java: `# Multi-stage Dockerfile — Java / ${c.buildTool}
+FROM eclipse-temurin:17-jdk-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN ${c.buildTool==='Gradle' ? './gradlew build -x test' : 'mvn package -DskipTests'}
+
+FROM ${c.baseImage}
+WORKDIR /app
+COPY --from=builder /app/${c.buildTool==='Gradle'?'build/libs':'target'}/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","app.jar"]
+`,
+    nodejs: `# Multi-stage Dockerfile — Node.js
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+EXPOSE 3000
+CMD ["node","src/index.js"]
+`,
+    python: `# Dockerfile — Python
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["python","-m","uvicorn","app.main:app","--host","0.0.0.0","--port","8000"]
+`,
+    go: `# Multi-stage Dockerfile — Go
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/server
+
+FROM gcr.io/distroless/base
+COPY --from=builder /app/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+`,
+    dotnet: `# Multi-stage Dockerfile — .NET 8
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS builder
+WORKDIR /app
+COPY *.csproj ./
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c Release -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=builder /publish .
+EXPOSE 8080
+ENTRYPOINT ["dotnet","${c.project}.dll"]
+`,
+  };
+  return dockerfiles[lang] || dockerfiles.java;
+}
+
+function buildK8sDeployment(c) {
+  return `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${c.project}
+  namespace: ${c.namespace}
+  labels:
+    app: ${c.project}
+spec:
+  replicas: ${c.replicas}
+  selector:
+    matchLabels:
+      app: ${c.project}
+  template:
+    metadata:
+      labels:
+        app: ${c.project}
+    spec:
+      containers:
+        - name: app
+          image: REGISTRY/${c.project}:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: ${c.cpuReq}
+              memory: ${c.memReq}
+            limits:
+              cpu: ${c.cpuLim}
+              memory: ${c.memLim}
+          envFrom:
+            - secretRef:
+                name: ${c.project}-secrets
+`;
+}
+
+function buildK8sService(c) {
+  return `apiVersion: v1
+kind: Service
+metadata:
+  name: ${c.project}
+  namespace: ${c.namespace}
+spec:
+  selector:
+    app: ${c.project}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+`;
+}
+
+function buildOcpRoute(c) {
+  return `apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: ${c.project}
+  namespace: ${c.namespace}
+spec:
+  host: ${c.routeHost || c.project+'.apps.company.com'}
+  to:
+    kind: Service
+    name: ${c.project}
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+`;
+}
+
+function buildHelmChart(c) {
+  return `apiVersion: v2
+name: ${c.project}
+description: Helm chart for ${c.project}
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+`;
+}
+
+function buildHelmValues(c) {
+  return `replicaCount: ${c.replicas}
+image:
+  repository: REGISTRY/${c.project}
+  tag: latest
+  pullPolicy: IfNotPresent
+resources:
+  requests:
+    cpu: ${c.cpuReq}
+    memory: ${c.memReq}
+  limits:
+    cpu: ${c.cpuLim}
+    memory: ${c.memLim}
+namespace: ${c.namespace}
+`;
+}
+
+function buildHelmEnvValues(c) {
+  return `# Environment-specific overrides for: ${c.env}
+replicaCount: ${c.replicas}
+`;
+}
+
+function buildSonarProps(c, lang) {
+  const srcMap = {java:'src/main/java',nodejs:'src',python:'.',go:'.',dotnet:'.'};
+  return `sonar.projectKey=${c.project}
+sonar.projectName=${c.project}
+sonar.sources=${srcMap[lang]||'.'}
+sonar.host.url=\${SONAR_HOST_URL}
+sonar.login=\${SONAR_TOKEN}
+`;
+}
+
+// ─────────────────────────────────────────────
+// DOWNLOAD / COPY
+// ─────────────────────────────────────────────
+function triggerBlobDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+async function downloadLang(lang) {
+  const c = getConfig();
+  toast('⏳ Building ZIP package...');
+  try {
+    const blob = await buildZip(lang);
+    triggerBlobDownload(blob, `${c.project}-${lang}-pipeline.zip`);
+    toast(`✅ Downloaded ${LANG_META[lang].label} pipeline ZIP`);
+  } catch(e) {
+    toast('❌ ZIP generation failed: ' + e.message);
+  }
+}
+
+async function downloadAllZip() {
+  const c = getConfig();
+  toast('⏳ Building ZIP package...');
+  try {
+    const blob = await buildZip(c.lang);
+    triggerBlobDownload(blob, `${c.project}-${c.lang}-pipeline.zip`);
+    toast(`✅ Downloaded complete pipeline ZIP for ${LANG_META[c.lang].label}`);
+  } catch(e) {
+    toast('❌ ZIP generation failed: ' + e.message);
+  }
+}
+
+function downloadCurrent() {
+  const { yaml, lang } = getActiveYaml();
+  const c = getConfig();
+  const blob = new Blob([yaml], {type:'text/yaml;charset=utf-8'});
+  triggerBlobDownload(blob, `${c.project}-${lang}-gitlab-ci.yml`);
+  toast('✅ Pipeline YAML downloaded (single file)');
+}
+
+function copyYaml() {
+  const { yaml } = getActiveYaml();
+  navigator.clipboard.writeText(yaml).then(()=> toast('📋 Copied to clipboard'));
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast toast-success';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),80);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},3000);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+showStep(0);
+
+// ─────────────────────────────────────────────
+// PAGE RENDERERS — safe JS, no inline template literals in HTML
+// ─────────────────────────────────────────────
+
+function renderDashboard() {
+  const stats = [
+    {label:'Total Pipelines', val:'47', sub:'▲ 8 this week', subColor:'#22c55e', valColor:'#60a5fa'},
+    {label:'Active Clusters',  val:'6',  sub:'3 prod · 2 qa · 1 dev', subColor:'var(--muted)', valColor:'#22d3ee'},
+    {label:'Pending Approvals',val:'5',  sub:'2 high priority', subColor:'#f97316', valColor:'#fcd34d'},
+    {label:'Success Rate',     val:'94%',sub:'▲ 2% vs last week', subColor:'#22c55e', valColor:'#86efac'},
+  ];
+  const runs = [
+    {name:'payments-api', lang:'☕ Java',   status:'success',   branch:'main',           time:'2 min ago',  dur:'4m 12s'},
+    {name:'auth-service', lang:'🟢 Node.js',status:'success',   branch:'main',           time:'18 min ago', dur:'2m 55s'},
+    {name:'data-processor',lang:'🐍 Python',status:'failed',    branch:'feature/kafka',  time:'34 min ago', dur:'1m 08s'},
+    {name:'api-gateway',  lang:'🐹 Go',     status:'running',   branch:'main',           time:'1 hr ago',   dur:'—'},
+    {name:'report-svc',   lang:'🔷 .NET',   status:'success',   branch:'release/2.1',    time:'2 hr ago',   dur:'3m 44s'},
+    {name:'user-portal',  lang:'🟢 Node.js',status:'cancelled', branch:'hotfix/login',   time:'3 hr ago',   dur:'0m 42s'},
+  ];
+  const clusters = [
+    {name:'prod-openshift-01', health:98,  color:'#22c55e'},
+    {name:'prod-k8s-02',       health:95,  color:'#22c55e'},
+    {name:'qa-k8s-01',         health:87,  color:'#f59e0b'},
+    {name:'dev-k8s-01',        health:100, color:'#22c55e'},
+  ];
+  const statusIcon = {success:'✅', failed:'❌', running:'🔄', cancelled:'⛔'};
+  const badgeStyle = s =>
+    s==='success'  ? 'background:rgba(34,197,94,.15);color:#86efac;' :
+    s==='failed'   ? 'background:rgba(220,38,38,.15);color:#f87171;' :
+    s==='running'  ? 'background:rgba(37,99,235,.15);color:#60a5fa;' :
+                     'background:rgba(100,116,139,.15);color:#94a3b8;';
+
+  const el = document.getElementById('page-dashboard');
+  el.innerHTML = '';
+
+  // Stat cards
+  const grid = el.appendChild(document.createElement('div'));
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;';
+  stats.forEach(s => {
+    const c = grid.appendChild(document.createElement('div'));
+    c.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+    c.innerHTML = `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;">${s.label}</div>
+      <div style="font-size:32px;font-weight:800;color:${s.valColor};">${s.val}</div>
+      <div style="font-size:12px;color:${s.subColor};margin-top:4px;">${s.sub}</div>`;
+  });
+
+  // Two-column layout
+  const cols = el.appendChild(document.createElement('div'));
+  cols.style.cssText = 'display:grid;grid-template-columns:1fr 340px;gap:16px;';
+
+  // Recent runs
+  const runsPanel = cols.appendChild(document.createElement('div'));
+  runsPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  runsPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;">Recent Pipeline Runs</div>';
+  runs.forEach(r => {
+    const row = runsPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML = `<span style="font-size:18px;">${statusIcon[r.status]}</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#fff;">${r.name} <span style="font-size:11px;color:var(--muted);font-weight:400;">· ${r.lang}</span></div>
+        <div style="font-size:11px;color:var(--muted);">branch: ${r.branch} · ${r.time}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${badgeStyle(r.status)}">${r.status}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">${r.dur}</div>
+      </div>`;
+  });
+
+  // Right column
+  const right = cols.appendChild(document.createElement('div'));
+  right.style.cssText = 'display:flex;flex-direction:column;gap:16px;';
+
+  // Quick actions
+  const qa = right.appendChild(document.createElement('div'));
+  qa.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  qa.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;">Quick Actions</div>';
+  [['btn-primary','🚀 New Pipeline','pipeline'],['btn-secondary','🆕 Onboard App','onboarding'],
+   ['btn-secondary','🔑 Add Secret','secrets'],['btn-secondary','✅ Review Approvals','approvals']].forEach(([cls,lbl,page]) => {
+    const b = qa.appendChild(document.createElement('button'));
+    b.className = `btn ${cls}`;
+    b.style.cssText = 'width:100%;justify-content:center;margin-bottom:8px;';
+    b.textContent = lbl;
+    b.onclick = () => navTo(page);
+  });
+
+  // Cluster health
+  const ch = right.appendChild(document.createElement('div'));
+  ch.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  ch.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:14px;">Cluster Health</div>';
+  clusters.forEach(c => {
+    const row = ch.appendChild(document.createElement('div'));
+    row.style.cssText = 'margin-bottom:12px;';
+    row.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="color:#cbd5e1;">${c.name}</span><span style="color:${c.color};font-weight:700;">${c.health}%</span>
+      </div>
+      <div style="height:6px;background:#1e293b;border-radius:3px;">
+        <div style="height:100%;width:${c.health}%;background:${c.color};border-radius:3px;"></div>
+      </div>`;
+  });
+}
+
+function renderOnboarding() {
+  const recent = [
+    {app:'invoice-svc',  team:'billing',   cluster:'prod-openshift-01', status:'active',  date:'2026-05-25'},
+    {app:'notif-worker', team:'platform',  cluster:'prod-k8s-02',       status:'active',  date:'2026-05-22'},
+    {app:'analytics-api',team:'data',      cluster:'qa-k8s-01',         status:'pending', date:'2026-05-20'},
+    {app:'legacy-adapter',team:'migration',cluster:'dev-k8s-01',        status:'active',  date:'2026-05-18'},
+  ];
+  const el = document.getElementById('page-onboarding');
+  const form = el.appendChild(document.createElement('div'));
+  form.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:720px;';
+  form.innerHTML = `
+    <h2 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;">🆕 Application Onboarding</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Register a new application on the platform. This creates namespace, RBAC, service account and initial pipeline.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="form-row"><label>App Name</label><input class="input" placeholder="payments-api"></div>
+      <div class="form-row"><label>Team / Owner</label><input class="input" placeholder="platform-team"></div>
+    </div>
+    <div class="form-row"><label>GitLab Repository URL</label><input class="input" placeholder="https://gitlab.company.com/team/app"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="form-row"><label>Target Cluster</label>
+        <select class="input"><option>prod-openshift-01</option><option>prod-k8s-02</option><option>qa-k8s-01</option><option>dev-k8s-01</option></select>
+      </div>
+      <div class="form-row"><label>Namespace</label><input class="input" placeholder="app-prod"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="form-row"><label>Language</label>
+        <select class="input"><option>Java</option><option>Node.js</option><option>Python</option><option>Go</option><option>.NET</option></select>
+      </div>
+      <div class="form-row"><label>Tier</label>
+        <select class="input"><option>Production</option><option>Non-Production</option><option>Internal Tool</option></select>
+      </div>
+    </div>
+    <div class="form-row"><label>Contact Email</label><input class="input" placeholder="team@company.com" type="email"></div>
+    <div class="form-row"><label>Description</label>
+      <textarea class="input" rows="3" placeholder="Brief description of what this application does..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;" id="onboarding-actions"></div>`;
+
+  const actions = form.querySelector('#onboarding-actions');
+  const submit = actions.appendChild(document.createElement('button'));
+  submit.className = 'btn btn-primary';
+  submit.textContent = 'Submit Onboarding Request';
+  submit.onclick = () => toast('✅ Application registered! Namespace and pipeline will be created in ~2 minutes.');
+  const draft = actions.appendChild(document.createElement('button'));
+  draft.className = 'btn btn-secondary';
+  draft.textContent = 'Save Draft';
+  draft.onclick = () => toast('📋 Draft saved');
+
+  // Recent onboardings table
+  const table = el.appendChild(document.createElement('div'));
+  table.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;margin-top:20px;';
+  table.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;">Recent Onboardings</div>';
+  const t = table.appendChild(document.createElement('table'));
+  t.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;';
+  t.innerHTML = `<thead><tr style="color:var(--muted);border-bottom:1px solid var(--border);">
+    <th style="text-align:left;padding:8px 0;">App</th><th>Team</th><th>Cluster</th><th>Status</th><th>Date</th>
+  </tr></thead><tbody></tbody>`;
+  const tbody = t.querySelector('tbody');
+  recent.forEach(r => {
+    const tr = tbody.appendChild(document.createElement('tr'));
+    tr.style.cssText = 'border-bottom:1px solid var(--border);';
+    tr.innerHTML = `<td style="padding:10px 0;color:#fff;font-weight:600;">${r.app}</td>
+      <td style="padding:10px;color:var(--muted);">${r.team}</td>
+      <td style="padding:10px;color:var(--muted);">${r.cluster}</td>
+      <td style="padding:10px;"><span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${r.status==='active'?'rgba(34,197,94,.15)':'rgba(249,115,22,.15)'};color:${r.status==='active'?'#86efac':'#fdba74'};">${r.status}</span></td>
+      <td style="padding:10px;color:var(--muted);">${r.date}</td>`;
+  });
+}
+
+function renderApplications() {
+  const apps = [
+    {name:'payments-api',  lang:'☕',team:'platform',  cluster:'prod-os-01',  ns:'payments-prod', rep:'3/3',deploy:'27 May 09:12',status:'healthy'},
+    {name:'auth-service',  lang:'🟢',team:'security',  cluster:'prod-k8s-02', ns:'auth-prod',     rep:'2/2',deploy:'26 May 17:44',status:'healthy'},
+    {name:'data-processor',lang:'🐍',team:'data',      cluster:'qa-k8s-01',   ns:'data-qa',       rep:'1/2',deploy:'26 May 14:02',status:'degraded'},
+    {name:'api-gateway',   lang:'🐹',team:'platform',  cluster:'prod-os-01',  ns:'gateway-prod',  rep:'4/4',deploy:'25 May 22:10',status:'healthy'},
+    {name:'report-svc',    lang:'🔷',team:'reports',   cluster:'prod-k8s-02', ns:'reports-prod',  rep:'2/2',deploy:'24 May 11:30',status:'healthy'},
+    {name:'legacy-adapter',lang:'☕',team:'migration', cluster:'dev-k8s-01',  ns:'legacy-dev',    rep:'1/1',deploy:'20 May 08:00',status:'unknown'},
+  ];
+  const statusBadge = s =>
+    s==='healthy'  ? 'background:rgba(34,197,94,.15);color:#86efac;' :
+    s==='degraded' ? 'background:rgba(249,115,22,.15);color:#fdba74;' :
+                     'background:rgba(100,116,139,.15);color:#94a3b8;';
+
+  const el = document.getElementById('page-applications');
+  el.innerHTML = '';
+
+  const header = el.appendChild(document.createElement('div'));
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;';
+  header.innerHTML = `<div><h2 style="font-size:20px;font-weight:700;color:#fff;">📦 Applications</h2>
+    <p style="font-size:13px;color:var(--muted);">All registered applications across clusters</p></div>`;
+  const btnRow = header.appendChild(document.createElement('div'));
+  btnRow.style.cssText = 'display:flex;gap:10px;';
+  btnRow.innerHTML = '<input class="input" placeholder="🔍 Search apps..." style="width:220px;">';
+  const onbBtn = btnRow.appendChild(document.createElement('button'));
+  onbBtn.className = 'btn btn-primary';
+  onbBtn.textContent = '+ Onboard New';
+  onbBtn.onclick = () => navTo('onboarding');
+
+  const wrap = el.appendChild(document.createElement('div'));
+  wrap.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;';
+  const t = wrap.appendChild(document.createElement('table'));
+  t.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;';
+  t.innerHTML = `<thead style="background:#1e293b;"><tr style="color:var(--muted);">
+    <th style="text-align:left;padding:14px 20px;">Application</th>
+    <th style="padding:14px;">Language</th><th style="padding:14px;">Cluster / NS</th>
+    <th style="padding:14px;">Replicas</th><th style="padding:14px;">Last Deploy</th>
+    <th style="padding:14px;">Status</th><th style="padding:14px;">Actions</th>
+  </tr></thead><tbody></tbody>`;
+  const tbody = t.querySelector('tbody');
+  apps.forEach(r => {
+    const tr = tbody.appendChild(document.createElement('tr'));
+    tr.style.cssText = 'border-bottom:1px solid var(--border);transition:background .15s;cursor:default;';
+    tr.onmouseover = () => tr.style.background = '#1e293b';
+    tr.onmouseout  = () => tr.style.background = '';
+    tr.innerHTML = `
+      <td style="padding:14px 20px;"><span style="font-weight:700;color:#fff;">${r.name}</span><br><span style="font-size:11px;color:var(--muted);">${r.team}</span></td>
+      <td style="padding:14px;text-align:center;font-size:20px;">${r.lang}</td>
+      <td style="padding:14px;color:var(--muted);font-size:12px;">${r.cluster}<br>${r.ns}</td>
+      <td style="padding:14px;text-align:center;color:#cbd5e1;">${r.rep}</td>
+      <td style="padding:14px;color:var(--muted);font-size:12px;">${r.deploy}</td>
+      <td style="padding:14px;"><span style="display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${statusBadge(r.status)}">${r.status}</span></td>
+      <td style="padding:14px;" class="app-actions"></td>`;
+    const actions = tr.querySelector('.app-actions');
+    const btnWrap = actions.appendChild(document.createElement('div'));
+    btnWrap.style.cssText = 'display:flex;gap:6px;';
+    const rdp = btnWrap.appendChild(document.createElement('button'));
+    rdp.className = 'btn btn-secondary btn-sm';
+    rdp.textContent = 'Redeploy';
+    rdp.onclick = () => toast(`🔄 Redeploy triggered for ${r.name}`);
+    const log = btnWrap.appendChild(document.createElement('button'));
+    log.className = 'btn btn-secondary btn-sm';
+    log.textContent = 'Logs';
+    log.onclick = () => toast(`📋 Viewing logs for ${r.name}`);
+  });
+}
+
+function renderClusters() {
+  const clusters = [
+    {name:'prod-openshift-01',type:'OpenShift 4.14',env:'Production', nodes:12,cpu:'68%',mem:'74%',health:98, color:'#22c55e',apps:18},
+    {name:'prod-k8s-02',      type:'Kubernetes 1.29',env:'Production',nodes:8, cpu:'52%',mem:'61%',health:95, color:'#22c55e',apps:12},
+    {name:'qa-k8s-01',        type:'Kubernetes 1.28',env:'QA',         nodes:4, cpu:'34%',mem:'45%',health:87, color:'#f59e0b',apps:9},
+    {name:'dev-k8s-01',       type:'Kubernetes 1.29',env:'Development',nodes:3, cpu:'22%',mem:'38%',health:100,color:'#22c55e',apps:14},
+    {name:'dr-openshift-02',  type:'OpenShift 4.13', env:'DR',          nodes:6, cpu:'5%', mem:'12%',health:100,color:'#22c55e',apps:0},
+    {name:'sandbox-k8s-01',   type:'Kubernetes 1.30',env:'Sandbox',     nodes:2, cpu:'15%',mem:'28%',health:92, color:'#22c55e',apps:5},
+  ];
+  const el = document.getElementById('page-clusters');
+  el.innerHTML = '';
+
+  const header = el.appendChild(document.createElement('div'));
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;';
+  header.innerHTML = `<div><h2 style="font-size:20px;font-weight:700;color:#fff;">☸️ Clusters</h2>
+    <p style="font-size:13px;color:var(--muted);">Kubernetes & OpenShift cluster registry</p></div>`;
+  const regBtn = header.appendChild(document.createElement('button'));
+  regBtn.className = 'btn btn-primary';
+  regBtn.textContent = '+ Register Cluster';
+  regBtn.onclick = () => toast('📡 Register Cluster dialog coming soon');
+
+  const grid = el.appendChild(document.createElement('div'));
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;';
+
+  clusters.forEach(c => {
+    const card = grid.appendChild(document.createElement('div'));
+    card.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff;">${c.name}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${c.type} · ${c.env}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${c.color};background:${c.color}22;padding:3px 10px;border-radius:20px;">${c.health}% healthy</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div style="text-align:center;background:#0f172a;padding:10px;border-radius:8px;">
+          <div style="font-size:18px;font-weight:800;color:#60a5fa;">${c.nodes}</div>
+          <div style="font-size:10px;color:var(--muted);">Nodes</div>
+        </div>
+        <div style="text-align:center;background:#0f172a;padding:10px;border-radius:8px;">
+          <div style="font-size:18px;font-weight:800;color:#f97316;">${c.cpu}</div>
+          <div style="font-size:10px;color:var(--muted);">CPU</div>
+        </div>
+        <div style="text-align:center;background:#0f172a;padding:10px;border-radius:8px;">
+          <div style="font-size:18px;font-weight:800;color:#a78bfa;">${c.apps}</div>
+          <div style="font-size:10px;color:var(--muted);">Apps</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;" class="cluster-btns"></div>`;
+    const btnRow = card.querySelector('.cluster-btns');
+    const dash = btnRow.appendChild(document.createElement('button'));
+    dash.className = 'btn btn-secondary btn-sm';
+    dash.style.flex = '1';
+    dash.textContent = 'Dashboard';
+    dash.onclick = () => toast(`📊 Opening ${c.name} dashboard`);
+    const ns = btnRow.appendChild(document.createElement('button'));
+    ns.className = 'btn btn-secondary btn-sm';
+    ns.style.flex = '1';
+    ns.textContent = 'Namespaces';
+    ns.onclick = () => toast(`📋 Showing ${c.name} namespaces`);
+  });
+}
+
+function renderSecrets() {
+  const sources = [
+    {icon:'🔐', name:'GitLab Variables', count:24, active:true},
+    {icon:'🏛',  name:'HashiCorp Vault',  count:38, active:false},
+    {icon:'🏢', name:'Internal CSM',      count:12, active:false},
+    {icon:'☁️', name:'AWS Secrets Mgr',  count:9,  active:false},
+  ];
+  const vars = [
+    {name:'SONAR_TOKEN',       scope:'Group',   env:'All',        prot:true,  masked:true},
+    {name:'REGISTRY_PASSWORD', scope:'Group',   env:'All',        prot:true,  masked:true},
+    {name:'OPENSHIFT_TOKEN',   scope:'Project', env:'production', prot:true,  masked:true},
+    {name:'SLACK_WEBHOOK_URL', scope:'Group',   env:'All',        prot:false, masked:true},
+    {name:'JAVA_VERSION',      scope:'Project', env:'All',        prot:false, masked:false},
+    {name:'NEXUS_URL',         scope:'Group',   env:'All',        prot:false, masked:false},
+    {name:'VAULT_TOKEN',       scope:'Project', env:'production', prot:true,  masked:true},
+  ];
+  const el = document.getElementById('page-secrets');
+  el.innerHTML = '';
+
+  const header = el.appendChild(document.createElement('div'));
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;';
+  header.innerHTML = `<div><h2 style="font-size:20px;font-weight:700;color:#fff;">🔑 Secrets Management</h2>
+    <p style="font-size:13px;color:var(--muted);">Manage CI/CD variables and vault-backed secrets</p></div>`;
+  const addBtn = header.appendChild(document.createElement('button'));
+  addBtn.className = 'btn btn-primary';
+  addBtn.textContent = '+ Add Secret';
+  addBtn.onclick = () => toast('🔑 Add Secret dialog — enter name, value, scope');
+
+  const layout = el.appendChild(document.createElement('div'));
+  layout.style.cssText = 'display:grid;grid-template-columns:260px 1fr;gap:20px;';
+
+  // Source list
+  const srcPanel = layout.appendChild(document.createElement('div'));
+  srcPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;';
+  srcPanel.innerHTML = '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Secret Sources</div>';
+  sources.forEach(s => {
+    const item = srcPanel.appendChild(document.createElement('div'));
+    item.style.cssText = `padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;background:${s.active?'rgba(37,99,235,.15)':'transparent'};`;
+    item.innerHTML = `<div style="font-size:13px;color:#fff;">${s.icon} ${s.name}</div><div style="font-size:11px;color:var(--muted);">${s.count} secrets</div>`;
+    item.onclick = () => { srcPanel.querySelectorAll('div[data-src]').forEach(d => d.style.background='transparent'); item.style.background='rgba(37,99,235,.15)'; };
+    item.setAttribute('data-src','');
+  });
+
+  // Variables table
+  const tableWrap = layout.appendChild(document.createElement('div'));
+  tableWrap.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;';
+  tableWrap.innerHTML = `<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;">
+    <input class="input" placeholder="🔍 Filter secrets..." style="flex:1;">
+    <select class="input" style="width:160px;"><option>All Scopes</option><option>Group</option><option>Project</option><option>Environment</option></select>
+  </div>`;
+  const t = tableWrap.appendChild(document.createElement('table'));
+  t.style.cssText = 'width:100%;border-collapse:collapse;font-size:13px;';
+  t.innerHTML = `<thead style="background:#1e293b;"><tr style="color:var(--muted);">
+    <th style="text-align:left;padding:12px 20px;">Variable Name</th>
+    <th style="padding:12px;">Scope</th><th style="padding:12px;">Environment</th>
+    <th style="padding:12px;">Protected</th><th style="padding:12px;">Masked</th><th style="padding:12px;">Actions</th>
+  </tr></thead><tbody></tbody>`;
+  const tbody = t.querySelector('tbody');
+  vars.forEach(s => {
+    const tr = tbody.appendChild(document.createElement('tr'));
+    tr.style.cssText = 'border-bottom:1px solid var(--border);';
+    const scopeColor = s.scope==='Group' ? 'background:rgba(37,99,235,.15);color:#60a5fa;' : 'background:rgba(139,92,246,.15);color:#c4b5fd;';
+    tr.innerHTML = `
+      <td style="padding:12px 20px;font-family:monospace;color:#60a5fa;font-size:12px;">${s.name}</td>
+      <td style="padding:12px;text-align:center;"><span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${scopeColor}">${s.scope}</span></td>
+      <td style="padding:12px;text-align:center;color:var(--muted);font-size:12px;">${s.env}</td>
+      <td style="padding:12px;text-align:center;">${s.prot?'🔒':'—'}</td>
+      <td style="padding:12px;text-align:center;">${s.masked?'🙈':'👁'}</td>
+      <td style="padding:12px;" class="sec-actions"></td>`;
+    const actions = tr.querySelector('.sec-actions');
+    const div = actions.appendChild(document.createElement('div'));
+    div.style.cssText = 'display:flex;gap:6px;justify-content:center;';
+    const editBtn = div.appendChild(document.createElement('button'));
+    editBtn.className = 'btn btn-secondary btn-sm';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = () => toast(`✏️ Edit ${s.name}`);
+    const delBtn = div.appendChild(document.createElement('button'));
+    delBtn.className = 'btn btn-secondary btn-sm';
+    delBtn.style.cssText = 'color:#f87171;border-color:#f87171;';
+    delBtn.textContent = 'Delete';
+    delBtn.onclick = () => toast(`🗑 Deleted ${s.name}`);
+  });
+}
+
+function renderApprovals() {
+  const items = [
+    {id:'APR-081',app:'payments-api',  type:'Prod Deploy',    requestor:'alice@company.com', branch:'release/3.2',       priority:'high',   time:'10 min ago', desc:'Release 3.2.0 — includes payment gateway integration and PCI compliance fixes'},
+    {id:'APR-080',app:'auth-service',  type:'Prod Deploy',    requestor:'bob@company.com',   branch:'main',              priority:'high',   time:'45 min ago', desc:'Security patch for CVE-2026-1234 — critical JWT vulnerability fix'},
+    {id:'APR-079',app:'data-processor',type:'Resource Scale', requestor:'carol@company.com', branch:'main',              priority:'medium', time:'2 hr ago',   desc:'Scale replicas from 2 to 4 due to increased ETL load'},
+    {id:'APR-078',app:'report-svc',    type:'Secret Update',  requestor:'dave@company.com',  branch:'main',              priority:'low',    time:'4 hr ago',   desc:'Rotate SMTP password for report delivery service'},
+    {id:'APR-077',app:'api-gateway',   type:'Config Change',  requestor:'eve@company.com',   branch:'config/rate-limits',priority:'medium', time:'6 hr ago',   desc:'Increase rate limit from 1000 to 2500 req/min for API gateway'},
+  ];
+  const el = document.getElementById('page-approvals');
+  el.innerHTML = '';
+
+  const header = el.appendChild(document.createElement('div'));
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;';
+  header.innerHTML = `<div><h2 style="font-size:20px;font-weight:700;color:#fff;">✅ Approvals</h2>
+    <p style="font-size:13px;color:var(--muted);">Pending deployment & policy approval requests</p></div>
+    <div style="display:flex;gap:8px;">
+      <span style="display:inline-flex;align-items:center;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(249,115,22,.15);color:#fdba74;">5 Pending</span>
+      <span style="display:inline-flex;align-items:center;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(34,197,94,.15);color:#86efac;">12 Approved Today</span>
+    </div>`;
+
+  const list = el.appendChild(document.createElement('div'));
+  list.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
+
+  items.forEach(a => {
+    const borderColor = a.priority==='high' ? 'rgba(220,38,38,.4)' : a.priority==='medium' ? 'rgba(245,158,11,.3)' : 'var(--border)';
+    const card = list.appendChild(document.createElement('div'));
+    card.style.cssText = `background:var(--panel);border:1px solid ${borderColor};border-radius:14px;padding:20px;`;
+
+    const priStyle = a.priority==='high' ? 'background:rgba(220,38,38,.15);color:#f87171;' :
+                     a.priority==='medium' ? 'background:rgba(249,115,22,.15);color:#fdba74;' :
+                     'background:rgba(37,99,235,.15);color:#60a5fa;';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:11px;font-family:monospace;color:var(--muted);">${a.id}</span>
+            <span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;${priStyle}">${a.priority}</span>
+            <span style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(139,92,246,.15);color:#c4b5fd;">${a.type}</span>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px;">${a.app} <span style="font-size:12px;color:var(--muted);font-weight:400;">· ${a.branch}</span></div>
+          <div style="font-size:13px;color:#cbd5e1;margin-bottom:6px;">${a.desc}</div>
+          <div style="font-size:11px;color:var(--muted);">Requested by ${a.requestor} · ${a.time}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;" class="apr-btns"></div>
+      </div>`;
+
+    const btnCol = card.querySelector('.apr-btns');
+    const approveBtn = btnCol.appendChild(document.createElement('button'));
+    approveBtn.className = 'btn btn-success btn-sm';
+    approveBtn.style.cssText = 'min-width:110px;justify-content:center;';
+    approveBtn.textContent = '✅ Approve';
+    approveBtn.onclick = () => { card.style.opacity = '.4'; toast(`✅ ${a.id} approved!`); };
+    const rejectBtn = btnCol.appendChild(document.createElement('button'));
+    rejectBtn.className = 'btn btn-danger-outline btn-sm';
+    rejectBtn.style.cssText = 'min-width:110px;justify-content:center;';
+    rejectBtn.textContent = '❌ Reject';
+    rejectBtn.onclick = () => { card.style.opacity = '.4'; toast(`❌ ${a.id} rejected`); };
+    const detailBtn = btnCol.appendChild(document.createElement('button'));
+    detailBtn.className = 'btn btn-secondary btn-sm';
+    detailBtn.style.cssText = 'min-width:110px;justify-content:center;';
+    detailBtn.textContent = 'View Details';
+    detailBtn.onclick = () => toast(`📋 Viewing ${a.id} details`);
+  });
+}
+
+function renderAuditLogs() {
+  const logs = [
+    {ts:'2026-05-27 09:42:11',user:'alice', action:'DEPLOY',        res:'payments-api → prod',  result:'success', ip:'10.0.1.42'},
+    {ts:'2026-05-27 09:38:04',user:'system',action:'PIPELINE_RUN',  res:'auth-service #247',     result:'success', ip:'—'},
+    {ts:'2026-05-27 09:21:55',user:'bob',   action:'APPROVE',       res:'APR-080',               result:'success', ip:'10.0.1.67'},
+    {ts:'2026-05-27 08:59:33',user:'carol', action:'SECRET_UPDATE', res:'OPENSHIFT_TOKEN',       result:'success', ip:'10.0.2.11'},
+    {ts:'2026-05-27 08:44:12',user:'dave',  action:'DELETE',        res:'legacy-adapter namespace',result:'success',ip:'10.0.1.55'},
+    {ts:'2026-05-27 08:31:07',user:'eve',   action:'LOGIN',         res:'platform UI',           result:'success', ip:'10.0.3.22'},
+    {ts:'2026-05-27 07:58:49',user:'unknown',action:'LOGIN',        res:'platform UI',           result:'FAILED',  ip:'185.220.101.7'},
+    {ts:'2026-05-27 07:45:22',user:'system',action:'PIPELINE_RUN',  res:'data-processor #189',   result:'FAILED',  ip:'—'},
+    {ts:'2026-05-27 07:12:00',user:'alice', action:'SECRET_CREATE', res:'VAULT_TOKEN',           result:'success', ip:'10.0.1.42'},
+    {ts:'2026-05-27 06:55:33',user:'bob',   action:'ONBOARD',       res:'invoice-svc',           result:'success', ip:'10.0.1.67'},
+  ];
+  const el = document.getElementById('page-auditlogs');
+  el.innerHTML = '';
+
+  const header = el.appendChild(document.createElement('div'));
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;';
+  header.innerHTML = `<div><h2 style="font-size:20px;font-weight:700;color:#fff;">📋 Audit Logs</h2>
+    <p style="font-size:13px;color:var(--muted);">Platform activity log — immutable event trail</p></div>`;
+  const expBtn = header.appendChild(document.createElement('button'));
+  expBtn.className = 'btn btn-secondary';
+  expBtn.textContent = '⬇ Export CSV';
+  expBtn.onclick = () => toast('📥 Exporting audit log CSV...');
+
+  const filters = el.appendChild(document.createElement('div'));
+  filters.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px;display:flex;gap:12px;flex-wrap:wrap;';
+  filters.innerHTML = `<input class="input" placeholder="🔍 Search events..." style="flex:1;min-width:180px;">
+    <select class="input" style="width:160px;"><option>All Actions</option><option>Deploy</option><option>Approve</option><option>Secret</option><option>Delete</option><option>Login</option></select>
+    <select class="input" style="width:160px;"><option>All Users</option><option>alice</option><option>bob</option><option>carol</option><option>dave</option></select>
+    <select class="input" style="width:140px;"><option>Last 24h</option><option>Last 7d</option><option>Last 30d</option><option>Custom</option></select>`;
+
+  const tableWrap = el.appendChild(document.createElement('div'));
+  tableWrap.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;';
+  const t = tableWrap.appendChild(document.createElement('table'));
+  t.style.cssText = 'width:100%;border-collapse:collapse;font-size:12px;';
+  t.innerHTML = `<thead style="background:#1e293b;"><tr style="color:var(--muted);">
+    <th style="text-align:left;padding:12px 20px;">Timestamp</th>
+    <th style="padding:12px;">User</th><th style="padding:12px;">Action</th>
+    <th style="padding:12px;text-align:left;">Resource</th><th style="padding:12px;">Result</th><th style="padding:12px;">IP</th>
+  </tr></thead><tbody></tbody>`;
+  const tbody = t.querySelector('tbody');
+  logs.forEach(l => {
+    const tr = tbody.appendChild(document.createElement('tr'));
+    tr.style.cssText = 'border-bottom:1px solid var(--border);';
+    const resultColor = l.result==='success' ? '#22c55e' : '#f87171';
+    tr.innerHTML = `
+      <td style="padding:10px 20px;font-family:monospace;color:var(--muted);">${l.ts}</td>
+      <td style="padding:10px;text-align:center;color:#cbd5e1;">${l.user}</td>
+      <td style="padding:10px;text-align:center;"><span style="font-family:monospace;font-size:11px;color:#60a5fa;background:rgba(37,99,235,.1);padding:2px 8px;border-radius:4px;">${l.action}</span></td>
+      <td style="padding:10px;color:#e2e8f0;">${l.res}</td>
+      <td style="padding:10px;text-align:center;color:${resultColor};font-weight:700;font-size:11px;">${l.result.toUpperCase()}</td>
+      <td style="padding:10px;text-align:center;font-family:monospace;color:var(--muted);">${l.ip}</td>`;
+  });
+  const footer = tableWrap.appendChild(document.createElement('div'));
+  footer.style.cssText = 'padding:12px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;';
+  footer.textContent = 'Showing 10 of 1,247 events';
+}
+
+function renderAdmin() {
+  const users = [
+    {name:'Alice Chen', email:'alice@company.com', role:'Platform Admin', status:'active'},
+    {name:'Bob Kumar',  email:'bob@company.com',   role:'Developer',      status:'active'},
+    {name:'Carol Singh',email:'carol@company.com', role:'Developer',      status:'active'},
+    {name:'Dave Lee',   email:'dave@company.com',  role:'Viewer',         status:'inactive'},
+    {name:'Eve Patel',  email:'eve@company.com',   role:'Developer',      status:'active'},
+  ];
+  const integrations = [
+    {name:'GitLab CE/EE',      icon:'🦊',status:'connected',    detail:'gitlab.company.com · v16.9'},
+    {name:'SonarQube',         icon:'🔍',status:'connected',    detail:'sonar.company.com · v10.4'},
+    {name:'HashiCorp Vault',   icon:'🏛', status:'connected',    detail:'vault.company.com · v1.15'},
+    {name:'Slack',             icon:'💬',status:'connected',    detail:'#devops-alerts'},
+    {name:'Nexus Repository',  icon:'📦',status:'connected',    detail:'nexus.company.com · v3.67'},
+    {name:'Trivy Server',      icon:'🔒',status:'disconnected', detail:'Not configured'},
+  ];
+  const groups = [
+    {name:'platform-admins',members:3, perms:'Full Access'},
+    {name:'developers',     members:18,perms:'Build & Deploy'},
+    {name:'security-team',  members:5, perms:'Scan Results Read'},
+    {name:'viewers',        members:22,perms:'Read Only'},
+  ];
+  const statsData = [
+    {label:'Total Pipeline Runs (30d)',val:'1,842',icon:'🚀'},
+    {label:'Avg Build Time',           val:'3m 28s',icon:'⏱'},
+    {label:'Security Issues Found',    val:'47',    icon:'🔒'},
+    {label:'Active Users',             val:'48',    icon:'👥'},
+    {label:'Storage Used',             val:'342 GB',icon:'💾'},
+    {label:'Uptime (30d)',             val:'99.94%',icon:'✅'},
+  ];
+
+  const el = document.getElementById('page-admin');
+  el.innerHTML = `<h2 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;">🛠 Admin</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Platform administration — users, groups, permissions, and integrations</p>`;
+
+  const grid = el.appendChild(document.createElement('div'));
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:20px;';
+
+  // Users panel
+  const usersPanel = grid.appendChild(document.createElement('div'));
+  usersPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  usersPanel.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:14px;font-weight:700;color:#fff;">👤 Users</div></div>';
+  const inviteBtn = usersPanel.querySelector('div > div:last-child') || usersPanel.querySelector('div');
+  const ib = usersPanel.querySelector('div[style*="space-between"]').appendChild(document.createElement('button'));
+  ib.className = 'btn btn-primary btn-sm';
+  ib.textContent = '+ Invite';
+  ib.onclick = () => toast('➕ Invite user dialog');
+  users.forEach(u => {
+    const row = usersPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);';
+    const roleStyle = u.role==='Platform Admin' ? 'background:rgba(249,115,22,.15);color:#fdba74;' : 'background:rgba(37,99,235,.15);color:#60a5fa;';
+    row.innerHTML = `
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">${u.name[0]}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#fff;">${u.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${u.email}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="display:inline-flex;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;${roleStyle}">${u.role}</div>
+        <div style="font-size:10px;color:${u.status==='active'?'#22c55e':'var(--muted)'};margin-top:3px;">${u.status}</div>
+      </div>`;
+  });
+
+  // Integrations panel
+  const intPanel = grid.appendChild(document.createElement('div'));
+  intPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  intPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;">🔌 Integrations</div>';
+  integrations.forEach(i => {
+    const row = intPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);';
+    const statusColor = i.status==='connected' ? '#22c55e' : '#f87171';
+    const statusDot = i.status==='connected' ? '● Connected' : '○ Disconnected';
+    row.innerHTML = `<span style="font-size:22px;">${i.icon}</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#fff;">${i.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${i.detail}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:${statusColor};">${statusDot}</span>`;
+  });
+  const addIntBtn = intPanel.appendChild(document.createElement('button'));
+  addIntBtn.className = 'btn btn-secondary btn-sm';
+  addIntBtn.style.cssText = 'margin-top:12px;width:100%;';
+  addIntBtn.textContent = '+ Add Integration';
+  addIntBtn.onclick = () => toast('⚙️ Configure integration');
+
+  // Groups panel
+  const grpPanel = grid.appendChild(document.createElement('div'));
+  grpPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  grpPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;">🏷 Groups & Permissions</div>';
+  groups.forEach(g => {
+    const row = grpPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML = `<div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#fff;">${g.name}</div>
+        <div style="font-size:11px;color:var(--muted);">${g.members} members · ${g.perms}</div>
+      </div>`;
+    const editBtn = row.appendChild(document.createElement('button'));
+    editBtn.className = 'btn btn-secondary btn-sm';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = () => toast(`✏️ Edit group ${g.name}`);
+  });
+  const addGrpBtn = grpPanel.appendChild(document.createElement('button'));
+  addGrpBtn.className = 'btn btn-secondary btn-sm';
+  addGrpBtn.style.cssText = 'margin-top:12px;width:100%;';
+  addGrpBtn.textContent = '+ Create Group';
+  addGrpBtn.onclick = () => toast('➕ Create group');
+
+  // Stats panel
+  const statsPanel = grid.appendChild(document.createElement('div'));
+  statsPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;';
+  statsPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:16px;">📈 Platform Stats</div>';
+  statsData.forEach(s => {
+    const row = statsPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML = `<span style="font-size:13px;color:#cbd5e1;">${s.icon} ${s.label}</span>
+      <span style="font-size:14px;font-weight:700;color:#fff;">${s.val}</span>`;
+  });
+}
+
+function renderSettings() {
+  const notifications = [
+    {label:'Pipeline failure alerts',    desc:'Notify on failed pipeline runs',     on:true},
+    {label:'Approval requests',          desc:'Alert when approval needed',          on:true},
+    {label:'Security scan results',      desc:'Summary of daily scan findings',      on:true},
+    {label:'Weekly digest',              desc:'Weekly platform health report',       on:false},
+    {label:'Cluster alerts',             desc:'Node down or high utilization',       on:true},
+  ];
+  const secDefaults = [
+    {label:'Require SonarQube gate',            on:true},
+    {label:'Require Trivy scan before deploy',  on:true},
+    {label:'Block deploy on CRITICAL CVE',      on:true},
+    {label:'Mandatory secret detection',        on:true},
+    {label:'IaC scan (Checkov)',                on:false},
+  ];
+  const accentColors = ['#2563eb','#7c3aed','#0891b2','#059669','#dc2626','#d97706'];
+
+  function makeToggle(on) {
+    const tog = document.createElement('div');
+    tog.style.cssText = `width:44px;height:24px;border-radius:12px;background:${on?'#2563eb':'#334155'};cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;`;
+    const dot = tog.appendChild(document.createElement('div'));
+    dot.style.cssText = `width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:${on?'23px':'3px'};transition:left .2s;`;
+    let state = on;
+    tog.onclick = () => {
+      state = !state;
+      tog.style.background = state ? '#2563eb' : '#334155';
+      dot.style.left = state ? '23px' : '3px';
+    };
+    return tog;
+  }
+
+  const el = document.getElementById('page-settings');
+  el.innerHTML = `<h2 style="font-size:20px;font-weight:700;color:#fff;margin-bottom:6px;">⚙️ Settings</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:24px;">Platform configuration and preferences</p>`;
+  const grid = el.appendChild(document.createElement('div'));
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:20px;';
+
+  // Platform config
+  const pc = grid.appendChild(document.createElement('div'));
+  pc.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;';
+  pc.innerHTML = `<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;">🌐 Platform Config</div>
+    <div class="form-row"><label>Platform Name</label><input class="input" value="DevOps Platform — Enterprise"></div>
+    <div class="form-row"><label>GitLab Base URL</label><input class="input" value="https://gitlab.company.com"></div>
+    <div class="form-row"><label>Default Cluster</label>
+      <select class="input"><option>prod-openshift-01</option><option>prod-k8s-02</option><option>qa-k8s-01</option></select>
+    </div>
+    <div class="form-row"><label>Default Registry</label>
+      <select class="input"><option>Nexus (nexus.company.com)</option><option>GitLab Registry</option><option>JFrog Artifactory</option></select>
+    </div>
+    <div class="form-row"><label>Default Branch</label><input class="input" value="main"></div>`;
+  const savePC = pc.appendChild(document.createElement('button'));
+  savePC.className = 'btn btn-primary';
+  savePC.textContent = 'Save Changes';
+  savePC.onclick = () => toast('✅ Platform config saved');
+
+  // Notifications
+  const notifPanel = grid.appendChild(document.createElement('div'));
+  notifPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;';
+  notifPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;">🔔 Notifications</div>';
+  notifications.forEach(n => {
+    const row = notifPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);';
+    const info = row.appendChild(document.createElement('div'));
+    info.innerHTML = `<div style="font-size:13px;font-weight:600;color:#fff;">${n.label}</div>
+      <div style="font-size:11px;color:var(--muted);">${n.desc}</div>`;
+    row.appendChild(makeToggle(n.on));
+  });
+  notifPanel.innerHTML += '<div class="form-row" style="margin-top:16px;"><label>Slack Webhook</label><input class="input" value="https://hooks.slack.com/services/…"></div>';
+  const saveNotif = notifPanel.appendChild(document.createElement('button'));
+  saveNotif.className = 'btn btn-primary';
+  saveNotif.textContent = 'Save Notifications';
+  saveNotif.onclick = () => toast('✅ Notification settings saved');
+
+  // Security defaults
+  const secPanel = grid.appendChild(document.createElement('div'));
+  secPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;';
+  secPanel.innerHTML = '<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;">🛡 Security Defaults</div>';
+  secDefaults.forEach(s => {
+    const row = secPanel.appendChild(document.createElement('div'));
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);';
+    const lbl = row.appendChild(document.createElement('span'));
+    lbl.style.cssText = 'font-size:13px;color:#cbd5e1;';
+    lbl.textContent = s.label;
+    row.appendChild(makeToggle(s.on));
+  });
+  const saveSec = secPanel.appendChild(document.createElement('button'));
+  saveSec.className = 'btn btn-primary';
+  saveSec.style.marginTop = '16px';
+  saveSec.textContent = 'Save Defaults';
+  saveSec.onclick = () => toast('✅ Security defaults saved');
+
+  // Appearance
+  const appPanel = grid.appendChild(document.createElement('div'));
+  appPanel.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;';
+  appPanel.innerHTML = `<div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:18px;">🎨 Appearance</div>
+    <div class="form-row"><label>Theme</label>
+      <select class="input"><option>Dark (Default)</option><option>Light</option><option>High Contrast</option></select>
+    </div>
+    <div class="form-row"><label>Accent Color</label><div style="display:flex;gap:10px;flex-wrap:wrap;" id="accent-swatches"></div></div>
+    <div class="form-row"><label>Items per page</label>
+      <select class="input"><option>25</option><option>50</option><option>100</option></select>
+    </div>
+    <div class="form-row"><label>Timezone</label>
+      <select class="input"><option>Asia/Kolkata (IST)</option><option>UTC</option><option>US/Eastern</option><option>Europe/London</option></select>
+    </div>`;
+  const swatchContainer = appPanel.querySelector('#accent-swatches');
+  accentColors.forEach(color => {
+    const swatch = swatchContainer.appendChild(document.createElement('div'));
+    swatch.style.cssText = `width:28px;height:28px;border-radius:50%;background:${color};cursor:pointer;transition:.2s;outline:${color==='#2563eb'?'2px solid #fff':'none'};`;
+    swatch.onclick = () => {
+      swatchContainer.querySelectorAll('div').forEach(s => s.style.outline = 'none');
+      swatch.style.outline = '2px solid #fff';
+    };
+  });
+  const saveApp = appPanel.appendChild(document.createElement('button'));
+  saveApp.className = 'btn btn-primary';
+  saveApp.textContent = 'Save Preferences';
+  saveApp.onclick = () => toast('✅ Appearance saved');
+}
+
+// Render all pages on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderDashboard();
+  renderOnboarding();
+  renderApplications();
+  renderClusters();
+  renderSecrets();
+  renderApprovals();
+  renderAuditLogs();
+  renderAdmin();
+  renderSettings();
+});
+</script>
+</body>
+</html>
