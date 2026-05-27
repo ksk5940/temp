@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applications - DevOps Platform</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Applications</h1>
+      </div>
+
+      <div class="right-top">
+        <div class="search-box">
+          <input type="text" id="searchBox" placeholder="Search applications..." onkeyup="filterApps()">
+        </div>
+
+        <button class="icon-btn">🔔</button>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <section style="padding:30px;">
+
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+
+          <select class="input" id="platformFilter" onchange="filterApps()">
+            <option value="">All Platforms</option>
+            <option>OpenShift</option>
+            <option>Kubernetes</option>
+            <option>EKS</option>
+            <option>GKE</option>
+          </select>
+
+          <select class="input" id="envFilter" onchange="filterApps()">
+            <option value="">All Environments</option>
+            <option>dev</option>
+            <option>qa</option>
+            <option>prod</option>
+          </select>
+
+          <select class="input" id="statusFilter" onchange="filterApps()">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Running</option>
+            <option>Pending</option>
+            <option>Failed</option>
+          </select>
+
+        </div>
+      </div>
+
+      <br>
+
+      <div class="card">
+        <table class="table" id="appsTable">
+          <thead>
+            <tr>
+              <th>Application</th>
+              <th>Team</th>
+              <th>Environment</th>
+              <th>Platform</th>
+              <th>Onboarding</th>
+              <th>Deployment</th>
+              <th>Route URL</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>payments-api</td>
+              <td>core-platform</td>
+              <td>prod</td>
+              <td>OpenShift</td>
+              <td>Completed</td>
+              <td>Active</td>
+              <td>payments.company.com</td>
+              <td>
+                <button class="btn btn-secondary" onclick="showToast('View app details')">View</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>orders-api</td>
+              <td>commerce</td>
+              <td>qa</td>
+              <td>EKS</td>
+              <td>Completed</td>
+              <td>Running</td>
+              <td>orders.company.com</td>
+              <td>
+                <button class="btn btn-secondary" onclick="showToast('Deployment triggered')">Deploy</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>inventory-service</td>
+              <td>retail</td>
+              <td>dev</td>
+              <td>Kubernetes</td>
+              <td>Completed</td>
+              <td>Pending</td>
+              <td>inventory.company.com</td>
+              <td>
+                <button class="btn btn-secondary" onclick="showToast('Rollback simulated')">Rollback</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>billing-api</td>
+              <td>finance</td>
+              <td>prod</td>
+              <td>GKE</td>
+              <td>Completed</td>
+              <td>Failed</td>
+              <td>billing.company.com</td>
+              <td>
+                <button class="btn btn-secondary" onclick="showToast('Log viewer opened')">Logs</button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+function filterApps() {
+  const search = document.getElementById("searchBox").value.toLowerCase();
+  const platform = document.getElementById("platformFilter").value.toLowerCase();
+  const env = document.getElementById("envFilter").value.toLowerCase();
+  const status = document.getElementById("statusFilter").value.toLowerCase();
+
+  const rows = document.querySelectorAll("#appsTable tbody tr");
+
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+
+    const matchSearch = text.includes(search);
+    const matchPlatform = !platform || text.includes(platform);
+    const matchEnv = !env || text.includes(env);
+    const matchStatus = !status || text.includes(status);
+
+    row.style.display =
+      matchSearch && matchPlatform && matchEnv && matchStatus
+        ? ""
+        : "none";
+  });
+}
+</script>
+
+</body>
+</html>

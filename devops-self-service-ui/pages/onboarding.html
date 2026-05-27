@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Onboarding - DevOps Platform</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>New Application Onboarding</h1>
+      </div>
+
+      <div class="right-top">
+        <div class="search-box">
+          <input type="text" placeholder="Search..." />
+        </div>
+
+        <button class="icon-btn">🔔</button>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <section style="padding:30px;">
+
+      <div class="grid" style="grid-template-columns:2fr 1fr; gap:24px;">
+
+        <!-- LEFT FORM -->
+        <div class="card">
+          <h2>Infrastructure Onboarding</h2>
+          <p style="color:#94a3b8;margin-top:10px;">
+            Configure infrastructure resources for new application onboarding.
+          </p>
+
+          <br><br>
+
+          <label>Application Name</label>
+          <input class="input" id="appName" value="payments-api">
+
+          <br><br>
+
+          <label>Platform</label>
+          <select class="input" id="platformSelect" onchange="togglePlatformFields()">
+            <option>OpenShift</option>
+            <option>Kubernetes</option>
+            <option>EKS</option>
+            <option>GKE</option>
+          </select>
+
+          <br><br>
+
+          <label>Namespace</label>
+          <input class="input" value="payments-dev">
+
+          <br><br>
+
+          <label>Service Name</label>
+          <input class="input" value="payments-service">
+
+          <br><br>
+
+          <label>Deployment Name</label>
+          <input class="input" value="payments-deployment">
+
+          <br><br>
+
+          <label>Container Port</label>
+          <input class="input" value="8080">
+
+          <br><br>
+
+          <label>Service Port</label>
+          <input class="input" value="80">
+
+          <br><br>
+
+          <label>Replicas</label>
+          <input class="input" value="3">
+
+          <br><br>
+
+          <label>CPU Request</label>
+          <input class="input" value="500m">
+
+          <br><br>
+
+          <label>Memory Request</label>
+          <input class="input" value="512Mi">
+
+          <!-- OPENSHIFT -->
+          <div id="openshiftFields">
+            <br><br>
+
+            <label>Route Host</label>
+            <input class="input" value="payments.apps.company.com">
+
+            <br><br>
+
+            <label>Service Account</label>
+            <input class="input" value="payments-sa">
+
+            <br><br>
+
+            <label>RoleBinding</label>
+            <input class="input" value="payments-rb">
+          </div>
+
+          <!-- K8S -->
+          <div id="k8sFields" style="display:none;">
+            <br><br>
+
+            <label>Ingress Host</label>
+            <input class="input" value="payments.k8s.company.com">
+          </div>
+
+          <!-- AWS -->
+          <div id="eksFields" style="display:none;">
+            <br><br>
+
+            <label>AWS Account</label>
+            <input class="input" value="123456789012">
+
+            <br><br>
+
+            <label>Region</label>
+            <input class="input" value="ap-south-1">
+          </div>
+
+          <!-- GKE -->
+          <div id="gkeFields" style="display:none;">
+            <br><br>
+
+            <label>GCP Project ID</label>
+            <input class="input" value="enterprise-platform">
+
+            <br><br>
+
+            <label>Region</label>
+            <input class="input" value="asia-south1">
+          </div>
+
+          <br><br>
+
+          <h3>Secret References</h3>
+
+          <br>
+
+          <input class="input" value="DB_USER">
+          <br><br>
+          <input class="input" value="DB_PASSWORD">
+          <br><br>
+          <input class="input" value="API_KEY">
+
+          <br><br>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="provisionInfra(this)">
+              Provision Infrastructure
+            </button>
+
+            <button class="btn btn-secondary" onclick="simulateDeployment(this)">
+              Simulate Deployment
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT TIMELINE -->
+        <div class="card">
+          <h3>Provision Progress</h3>
+
+          <br>
+
+          <div id="timeline">
+
+            <div class="status pending">Namespace Creation</div>
+            <br>
+
+            <div class="status pending">Service Creation</div>
+            <br>
+
+            <div class="status pending">Deployment Config</div>
+            <br>
+
+            <div class="status pending">ConfigMap Creation</div>
+            <br>
+
+            <div class="status pending">Secret Binding</div>
+            <br>
+
+            <div class="status pending">Service Account</div>
+            <br>
+
+            <div class="status pending">RoleBinding</div>
+            <br>
+
+            <div class="status pending">Route / Ingress</div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+function togglePlatformFields() {
+  const platform = document.getElementById("platformSelect").value;
+
+  document.getElementById("openshiftFields").style.display = "none";
+  document.getElementById("k8sFields").style.display = "none";
+  document.getElementById("eksFields").style.display = "none";
+  document.getElementById("gkeFields").style.display = "none";
+
+  if (platform === "OpenShift") {
+    document.getElementById("openshiftFields").style.display = "block";
+  }
+
+  if (platform === "Kubernetes") {
+    document.getElementById("k8sFields").style.display = "block";
+  }
+
+  if (platform === "EKS") {
+    document.getElementById("eksFields").style.display = "block";
+  }
+
+  if (platform === "GKE") {
+    document.getElementById("gkeFields").style.display = "block";
+  }
+}
+
+function provisionInfra(button) {
+  simulateLoading(button, () => {
+    const items = document.querySelectorAll("#timeline .status");
+
+    items.forEach((item, index) => {
+      setTimeout(() => {
+        item.className = "status success";
+        item.innerText = item.innerText.replace("Pending", "");
+      }, index * 400);
+    });
+
+    showToast("Infrastructure provisioning completed");
+  });
+}
+
+function simulateDeployment(button) {
+  simulateLoading(button, () => {
+    showToast("Deployment simulated successfully");
+  });
+}
+</script>
+
+</body>
+</html>

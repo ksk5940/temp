@@ -1,0 +1,24 @@
+.maven-build:
+  image: maven:3.9.6-eclipse-temurin-17
+
+  stage: build
+
+  cache:
+    paths:
+      - .m2/repository
+
+  before_script:
+    - echo "Starting Maven build"
+
+  script:
+    - mvn clean package -DskipTests
+
+  artifacts:
+    paths:
+      - target/*.jar
+      - target/*.war
+      - target/*.ear
+    expire_in: 7 days
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH'

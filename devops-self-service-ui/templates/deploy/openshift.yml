@@ -1,0 +1,19 @@
+.openshift-deploy:
+  image: quay.io/openshift/origin-cli:latest
+
+  stage: deploy
+
+  before_script:
+    - echo "Logging into OpenShift"
+    - oc login "$OPENSHIFT_API" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+
+  script:
+    - oc project "$OPENSHIFT_NAMESPACE"
+    - oc apply -f k8s/
+    - oc rollout status deployment/$PROJECT_NAME
+
+  environment:
+    name: production
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approvals - DevOps Platform</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Approval Workflows</h1>
+      </div>
+
+      <div class="right-top">
+        <div class="search-box">
+          <input type="text" id="approvalSearch" placeholder="Search approval requests..." onkeyup="filterApprovals()">
+        </div>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section style="padding:30px;">
+
+      <div class="card">
+
+        <table class="table" id="approvalTable">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Application</th>
+              <th>Requester</th>
+              <th>Environment</th>
+              <th>Action</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>Decision</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>REQ-1001</td>
+              <td>payments-api</td>
+              <td>sree</td>
+              <td>prod</td>
+              <td>Production Deployment</td>
+              <td>10 mins ago</td>
+              <td><span class="status pending">Pending</span></td>
+              <td>
+                <button class="btn btn-primary"
+                  onclick="approveRequest('REQ-1001')">
+                  Approve
+                </button>
+                <button class="btn btn-secondary"
+                  onclick="rejectRequest('REQ-1001')">
+                  Reject
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>REQ-1002</td>
+              <td>orders-api</td>
+              <td>platform-team</td>
+              <td>qa</td>
+              <td>Rollback</td>
+              <td>28 mins ago</td>
+              <td><span class="status pending">Pending</span></td>
+              <td>
+                <button class="btn btn-primary"
+                  onclick="approveRequest('REQ-1002')">
+                  Approve
+                </button>
+                <button class="btn btn-secondary"
+                  onclick="rejectRequest('REQ-1002')">
+                  Reject
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>REQ-1003</td>
+              <td>inventory-service</td>
+              <td>retail-team</td>
+              <td>dev</td>
+              <td>Namespace Provision</td>
+              <td>1 hour ago</td>
+              <td><span class="status success">Approved</span></td>
+              <td>Completed</td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </div>
+
+      <br>
+
+      <div class="card">
+        <h3>Approval Summary</h3>
+        <br>
+
+        <div class="grid grid-4">
+          <div class="card">
+            <h2>2</h2>
+            <p>Pending</p>
+          </div>
+
+          <div class="card">
+            <h2>14</h2>
+            <p>Approved Today</p>
+          </div>
+
+          <div class="card">
+            <h2>1</h2>
+            <p>Rejected Today</p>
+          </div>
+
+          <div class="card">
+            <h2>17</h2>
+            <p>Total Requests</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+function approveRequest(id) {
+  confirmAction(`Approve ${id}?`, () => {
+    showToast(`${id} approved`);
+  });
+}
+
+function rejectRequest(id) {
+  confirmAction(`Reject ${id}?`, () => {
+    showToast(`${id} rejected`, "error");
+  });
+}
+
+function filterApprovals() {
+  const search = document.getElementById("approvalSearch").value.toLowerCase();
+  const rows = document.querySelectorAll("#approvalTable tbody tr");
+
+  rows.forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(search)
+      ? ""
+      : "none";
+  });
+}
+</script>
+
+</body>
+</html>

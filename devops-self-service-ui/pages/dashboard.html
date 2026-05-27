@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+  <script src="../js/charts.js"></script>
+  <script src="../js/mock-data.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Dashboard</h1>
+      </div>
+
+      <div class="right-top">
+        <div class="search-box">
+          <input type="text" placeholder="Search...">
+        </div>
+
+        <button class="icon-btn">🔔</button>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section style="padding:30px;">
+
+      <div class="grid grid-4">
+
+        <div class="card">
+          <h3>Total Applications</h3>
+          <h1>148</h1>
+        </div>
+
+        <div class="card">
+          <h3>Generated Pipelines</h3>
+          <h1>624</h1>
+        </div>
+
+        <div class="card">
+          <h3>Active Clusters</h3>
+          <h1>19</h1>
+        </div>
+
+        <div class="card">
+          <h3>Pending Approvals</h3>
+          <h1>8</h1>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="grid" style="grid-template-columns:2fr 1fr;">
+
+        <div class="card">
+          <h3>Deployments by Platform</h3>
+
+          <div class="chart">
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;margin-top:12px;">
+            <span>OpenShift</span>
+            <span>Kubernetes</span>
+            <span>EKS</span>
+            <span>GKE</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Deployment Success Rate</h3>
+          <h1 style="margin-top:30px;font-size:54px;">96.4%</h1>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="grid" style="grid-template-columns:1fr 1fr;">
+
+        <div class="card">
+          <h3>Security Scan Summary</h3>
+
+          <div class="chart">
+            <div class="scan-bar"></div>
+            <div class="scan-bar"></div>
+            <div class="scan-bar"></div>
+            <div class="scan-bar"></div>
+            <div class="scan-bar"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Recent Deployments</h3>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Application</th>
+                <th>Platform</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>payments-api</td>
+                <td>OpenShift</td>
+                <td><span class="status success">Success</span></td>
+              </tr>
+              <tr>
+                <td>orders-api</td>
+                <td>EKS</td>
+                <td><span class="status running">Running</span></td>
+              </tr>
+              <tr>
+                <td>inventory-service</td>
+                <td>Kubernetes</td>
+                <td><span class="status pending">Pending</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="card">
+        <h3>Quick Actions</h3>
+
+        <br>
+
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <a href="pipeline-builder.html" class="btn btn-primary">
+            Generate Pipeline
+          </a>
+
+          <a href="onboarding.html" class="btn btn-secondary">
+            New Onboarding
+          </a>
+
+          <a href="clusters.html" class="btn btn-secondary">
+            Add Cluster
+          </a>
+
+          <a href="secrets.html" class="btn btn-secondary">
+            Configure Secrets
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cluster Management - DevOps Platform</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Cluster Management</h1>
+      </div>
+
+      <div class="right-top">
+        <button class="btn btn-primary" onclick="openAddClusterModal()">
+          Add Cluster
+        </button>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <section style="padding:30px;">
+
+      <div class="grid grid-4">
+
+        <div class="card">
+          <h3>OpenShift Prod</h3>
+          <p style="color:#94a3b8;">openshift-prod-01</p>
+          <br>
+          <p><span class="status success">Connected</span></p>
+          <br>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="showToast('Connection validated')">
+              Validate
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Cluster updated')">
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Kubernetes Shared</h3>
+          <p style="color:#94a3b8;">k8s-shared-dev</p>
+          <br>
+          <p><span class="status success">Connected</span></p>
+          <br>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="showToast('Connection validated')">
+              Validate
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Cluster updated')">
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>AWS EKS</h3>
+          <p style="color:#94a3b8;">eks-platform-prod</p>
+          <br>
+          <p><span class="status running">Connected</span></p>
+          <br>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="showToast('Connection validated')">
+              Validate
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Cluster updated')">
+              Edit
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>GCP GKE</h3>
+          <p style="color:#94a3b8;">gke-enterprise-prod</p>
+          <br>
+          <p><span class="status pending">Validation Pending</span></p>
+          <br>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="showToast('Validation started')">
+              Validate
+            </button>
+            <button class="btn btn-secondary" onclick="showToast('Cluster updated')">
+              Edit
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="card">
+        <h2>Cluster Inventory</h2>
+        <br>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Cluster Name</th>
+              <th>Platform</th>
+              <th>Region</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>openshift-prod-01</td>
+              <td>OpenShift</td>
+              <td>DC1</td>
+              <td><span class="status success">Connected</span></td>
+              <td>
+                <button class="btn btn-secondary">Disable</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>eks-platform-prod</td>
+              <td>EKS</td>
+              <td>ap-south-1</td>
+              <td><span class="status running">Connected</span></td>
+              <td>
+                <button class="btn btn-secondary">Disable</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="clusterModal">
+  <div class="modal-content">
+    <h2>Add Cluster</h2>
+
+    <br>
+
+    <label>Cluster Name</label>
+    <input class="input" placeholder="cluster-name">
+
+    <br><br>
+
+    <label>Platform</label>
+    <select class="input">
+      <option>OpenShift</option>
+      <option>Kubernetes</option>
+      <option>EKS</option>
+      <option>GKE</option>
+    </select>
+
+    <br><br>
+
+    <label>API Endpoint</label>
+    <input class="input" placeholder="https://api.cluster.company.com">
+
+    <br><br>
+
+    <label>Region</label>
+    <input class="input" placeholder="ap-south-1">
+
+    <br><br>
+
+    <div style="display:flex;gap:12px;">
+      <button class="btn btn-primary" onclick="saveCluster()">
+        Save
+      </button>
+
+      <button class="btn btn-secondary" onclick="closeClusterModal()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openAddClusterModal() {
+  document.getElementById("clusterModal").style.display = "flex";
+}
+
+function closeClusterModal() {
+  document.getElementById("clusterModal").style.display = "none";
+}
+
+function saveCluster() {
+  closeClusterModal();
+  showToast("Cluster added successfully");
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("clusterModal");
+  if (event.target === modal) {
+    closeClusterModal();
+  }
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Pipeline Builder</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+  <script src="../js/modal.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="left-top">
+        <h1>Pipeline Builder Wizard</h1>
+      </div>
+    </header>
+
+    <section style="padding:30px;">
+
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;">
+
+        <div class="card">
+          <div class="wizard-step active" onclick="showStep(0)">1. Project Details</div>
+          <div class="wizard-step" onclick="showStep(1)">2. Lifecycle</div>
+          <div class="wizard-step" onclick="showStep(2)">3. Technology</div>
+          <div class="wizard-step" onclick="showStep(3)">4. Security</div>
+          <div class="wizard-step" onclick="showStep(4)">5. Container Build</div>
+          <div class="wizard-step" onclick="showStep(5)">6. Registry</div>
+          <div class="wizard-step" onclick="showStep(6)">7. Deployment Target</div>
+          <div class="wizard-step" onclick="showStep(7)">8. Cluster Config</div>
+          <div class="wizard-step" onclick="showStep(8)">9. Secrets</div>
+          <div class="wizard-step" onclick="showStep(9)">10. Review</div>
+        </div>
+
+        <div class="card">
+
+          <!-- STEP 1 -->
+          <div class="step-pane active">
+            <h2>Project Details</h2>
+            <br>
+            <label>Project Name</label>
+            <input class="input" id="projectName" value="payments-api">
+
+            <br><br>
+
+            <label>Repository URL</label>
+            <input class="input" id="repoUrl" value="https://gitlab.company.com/platform/payments-api">
+
+            <br><br>
+
+            <label>GitLab Project</label>
+            <select class="input">
+              <option>payments-api</option>
+              <option>orders-api</option>
+            </select>
+
+            <br><br>
+
+            <label>Branch</label>
+            <input class="input" value="main">
+
+            <br><br>
+
+            <label>Team</label>
+            <input class="input" value="platform-team">
+
+            <br><br>
+
+            <label>Environment</label>
+            <select class="input">
+              <option>dev</option>
+              <option>qa</option>
+              <option>prod</option>
+            </select>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step-pane">
+            <h2>Lifecycle</h2>
+            <br>
+
+            <label><input type="radio" name="life" checked> New Application Onboarding</label>
+            <br><br>
+            <label><input type="radio" name="life"> Existing Deployment</label>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step-pane">
+            <h2>Technology</h2>
+            <br>
+
+            <label>Language</label>
+            <select class="input" id="language">
+              <option>Java</option>
+              <option>Node.js</option>
+              <option>Python</option>
+              <option>Go</option>
+              <option>.NET</option>
+            </select>
+
+            <br><br>
+
+            <label>Build Tool</label>
+            <select class="input" id="buildTool">
+              <option>Maven</option>
+              <option>Gradle</option>
+              <option>npm</option>
+              <option>yarn</option>
+              <option>pip</option>
+              <option>poetry</option>
+            </select>
+
+            <br><br>
+
+            <label>Packaging</label>
+            <select class="input">
+              <option>JAR</option>
+              <option>WAR</option>
+              <option>EAR</option>
+            </select>
+          </div>
+
+          <!-- STEP 4 -->
+          <div class="step-pane">
+            <h2>Security Scans</h2>
+            <br>
+
+            <label><input type="checkbox" checked> SonarQube</label><br><br>
+            <label><input type="checkbox" checked> SAST</label><br><br>
+            <label><input type="checkbox" checked> Dependency Scan</label><br><br>
+            <label><input type="checkbox" checked> Secret Detection</label><br><br>
+            <label><input type="checkbox" checked> Trivy</label><br><br>
+            <label><input type="checkbox"> IaC Scan</label>
+          </div>
+
+          <!-- STEP 5 -->
+          <div class="step-pane">
+            <h2>Container Build</h2>
+            <br>
+
+            <label>Docker Enabled</label>
+            <select class="input">
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+
+            <br><br>
+
+            <label>Dockerfile Path</label>
+            <input class="input" value="Dockerfile">
+
+            <br><br>
+
+            <label>Image Tag Strategy</label>
+            <select class="input">
+              <option>CI_COMMIT_SHORT_SHA</option>
+              <option>latest</option>
+              <option>semantic-version</option>
+            </select>
+          </div>
+
+          <!-- STEP 6 -->
+          <div class="step-pane">
+            <h2>Registry</h2>
+            <br>
+
+            <select class="input">
+              <option>GitLab Registry</option>
+              <option>Nexus</option>
+              <option>Artifactory</option>
+              <option>OpenShift Registry</option>
+              <option>AWS ECR</option>
+              <option>GCP Artifact Registry</option>
+            </select>
+          </div>
+
+          <!-- STEP 7 -->
+          <div class="step-pane">
+            <h2>Deployment Target</h2>
+            <br>
+
+            <select class="input" id="deployTarget">
+              <option>OpenShift</option>
+              <option>Kubernetes</option>
+              <option>EKS</option>
+              <option>GKE</option>
+              <option>Helm</option>
+              <option>ArgoCD</option>
+            </select>
+          </div>
+
+          <!-- STEP 8 -->
+          <div class="step-pane">
+            <h2>Cluster Config</h2>
+            <br>
+
+            <label>Cluster</label>
+            <input class="input" value="openshift-prod-01">
+
+            <br><br>
+
+            <label>Namespace</label>
+            <input class="input" value="payments-prod">
+
+            <br><br>
+
+            <label>Route Host</label>
+            <input class="input" value="payments.apps.company.com">
+
+            <br><br>
+
+            <label>Replicas</label>
+            <input class="input" value="3">
+          </div>
+
+          <!-- STEP 9 -->
+          <div class="step-pane">
+            <h2>Secrets</h2>
+            <br>
+
+            <label>Secret Source</label>
+            <select class="input" id="secretSource" onchange="toggleSecretSource()">
+              <option>GitLab Variables</option>
+              <option>Vault</option>
+              <option>Internal CSM</option>
+            </select>
+
+            <div id="csmSection" style="display:none;">
+              <br><br>
+
+              <label>CSM URL</label>
+              <input class="input" value="https://internal-csm.company.com">
+
+              <br><br>
+
+              <label>Auth Type</label>
+              <select class="input">
+                <option>Token</option>
+                <option>Client Credentials</option>
+              </select>
+
+              <br><br>
+
+              <label>Secret Path</label>
+              <input class="input" value="/apps/payments/prod/db">
+
+              <br><br>
+
+              <button class="btn btn-secondary" onclick="showToast('Connection successful')">
+                Test Connection
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 10 -->
+          <div class="step-pane">
+            <h2>Review & Generate</h2>
+            <br>
+
+            <div class="card">
+              <strong>Pipeline Template Preview</strong>
+              <p>Reusable GitLab CI include-based architecture.</p>
+            </div>
+
+            <br>
+
+            <button class="btn btn-primary" onclick="generateYaml()">
+              Preview YAML
+            </button>
+
+            <button class="btn btn-secondary" onclick="showToast('Template saved')">
+              Save Template
+            </button>
+
+            <button class="btn btn-secondary" onclick="showToast('GitLab pipeline created')">
+              Create in GitLab
+            </button>
+          </div>
+
+          <br><br>
+
+          <div style="display:flex;justify-content:space-between;">
+            <button class="btn btn-secondary" onclick="prevStep()">Previous</button>
+            <button class="btn btn-primary" onclick="nextStep()">Next</button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<div class="modal" id="yamlModal">
+  <div class="modal-content">
+    <h2>Generated GitLab CI YAML</h2>
+    <br>
+    <pre id="yamlOutput"></pre>
+    <br>
+    <button class="btn btn-primary" onclick="closeModal('yamlModal')">Close</button>
+  </div>
+</div>
+
+<script>
+let currentStep = 0;
+const steps = document.querySelectorAll(".step-pane");
+const navSteps = document.querySelectorAll(".wizard-step");
+
+function showStep(index) {
+  steps.forEach(s => s.classList.remove("active"));
+  navSteps.forEach(s => s.classList.remove("active"));
+
+  steps[index].classList.add("active");
+  navSteps[index].classList.add("active");
+
+  currentStep = index;
+}
+
+function nextStep() {
+  if (currentStep < 9) showStep(currentStep + 1);
+}
+
+function prevStep() {
+  if (currentStep > 0) showStep(currentStep - 1);
+}
+
+function toggleSecretSource() {
+  const val = document.getElementById("secretSource").value;
+  document.getElementById("csmSection").style.display =
+    val === "Internal CSM" ? "block" : "none";
+}
+
+function generateYaml() {
+  const project = document.getElementById("projectName").value;
+  const lang = document.getElementById("language").value.toLowerCase();
+  const build = document.getElementById("buildTool").value.toLowerCase();
+  const target = document.getElementById("deployTarget").value.toLowerCase();
+
+  const yaml = `
+include:
+  - local: templates/base/stages.yml
+  - local: templates/languages/${lang}.yml
+  - local: templates/builds/${lang}/${build}.yml
+  - local: templates/docker/docker-build.yml
+  - local: templates/security/sonar.yml
+  - local: templates/security/sast.yml
+  - local: templates/security/trivy.yml
+  - local: templates/deploy/${target}.yml
+
+variables:
+  PROJECT_NAME: ${project}
+
+stages:
+  - build
+  - test
+  - scan
+  - docker
+  - deploy
+
+maven_build:
+  extends: .maven-build
+
+docker_image:
+  extends: .docker-build
+`;
+
+  document.getElementById("yamlOutput").textContent = yaml;
+  openModal("yamlModal");
+}
+
+showStep(0);
+</script>
+
+<style>
+.step-pane {
+  display: none;
+}
+.step-pane.active {
+  display: block;
+}
+.wizard-step {
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  background: #0f172a;
+}
+.wizard-step.active {
+  background: #2563eb;
+}
+</style>
+
+</body>
+</html>

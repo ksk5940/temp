@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console - DevOps Platform</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+
+  <script src="../js/app.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">D</div>
+      <div>
+        <h2>DevOps Platform</h2>
+        <p>Enterprise Self-Service</p>
+      </div>
+    </div>
+
+    <nav class="nav-menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="pipeline-builder.html">Pipeline Builder</a>
+      <a href="onboarding.html">App Onboarding</a>
+      <a href="applications.html">Applications</a>
+      <a href="clusters.html">Clusters</a>
+      <a href="secrets.html">Secrets</a>
+      <a href="approvals.html">Approvals</a>
+      <a href="audit-logs.html">Audit Logs</a>
+      <a href="admin.html">Admin</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="left-top">
+        <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+        <h1>Admin Console</h1>
+      </div>
+
+      <div class="right-top">
+        <button class="btn btn-primary" onclick="showToast('New policy created')">
+          Add Policy
+        </button>
+
+        <div class="user-profile">
+          <div class="avatar">SA</div>
+          <div>
+            <strong>Platform Admin</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section style="padding:30px;">
+
+      <div class="grid grid-4">
+
+        <div class="card">
+          <h3>Template Management</h3>
+          <p style="color:#94a3b8;margin-top:10px;">
+            Manage reusable CI/CD templates
+          </p>
+          <br>
+          <button class="btn btn-secondary"
+            onclick="showToast('Template editor opened')">
+            Manage
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Policy Rules</h3>
+          <p style="color:#94a3b8;margin-top:10px;">
+            Governance and approval rules
+          </p>
+          <br>
+          <button class="btn btn-secondary"
+            onclick="showToast('Policy editor opened')">
+            Manage
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Role Management</h3>
+          <p style="color:#94a3b8;margin-top:10px;">
+            RBAC user access management
+          </p>
+          <br>
+          <button class="btn btn-secondary"
+            onclick="showToast('Role management opened')">
+            Manage
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Notifications</h3>
+          <p style="color:#94a3b8;margin-top:10px;">
+            Email / webhook notification rules
+          </p>
+          <br>
+          <button class="btn btn-secondary"
+            onclick="showToast('Notification config opened')">
+            Manage
+          </button>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:24px;">
+
+        <!-- ROLE TABLE -->
+        <div class="card">
+          <h2>Roles</h2>
+          <br>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Platform Admin</td>
+                <td>Full Access</td>
+              </tr>
+              <tr>
+                <td>Developer</td>
+                <td>Pipeline + Deploy</td>
+              </tr>
+              <tr>
+                <td>Approver</td>
+                <td>Approval Workflow</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- POLICY TABLE -->
+        <div class="card">
+          <h2>Policies</h2>
+          <br>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Policy</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Mandatory Security Scans</td>
+                <td><span class="status success">Enabled</span></td>
+              </tr>
+              <tr>
+                <td>Production Approval Required</td>
+                <td><span class="status success">Enabled</span></td>
+              </tr>
+              <tr>
+                <td>Restricted Registry Access</td>
+                <td><span class="status success">Enabled</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <br><br>
+
+      <div class="card">
+        <h2>Platform Settings</h2>
+        <br>
+
+        <label>Default Deployment Platform</label>
+        <select class="input">
+          <option>OpenShift</option>
+          <option>Kubernetes</option>
+          <option>EKS</option>
+          <option>GKE</option>
+        </select>
+
+        <br><br>
+
+        <label>Approval Timeout (hours)</label>
+        <input class="input" value="24">
+
+        <br><br>
+
+        <button class="btn btn-primary"
+          onclick="showToast('Platform settings updated')">
+          Save Settings
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
