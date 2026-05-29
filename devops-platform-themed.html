@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DevOps Pipeline Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+/* ── DARK THEME ── */
+[data-theme="dark"]{
+  --bg:#0b1120;--panel:#111827;--panel2:#1e293b;--panel3:#334155;
+  --border:#2d3f55;--border2:#3d5068;
+  --text:#e2e8f0;--text2:#cbd5e1;--muted:#64748b;--muted2:#94a3b8;
+  --primary:#2563eb;--primaryH:#1d4ed8;--primaryGlow:rgba(37,99,235,.28);
+  --success:#16a34a;--successBg:rgba(22,163,74,.13);--successTx:#86efac;
+  --danger:#dc2626;--dangerBg:rgba(220,38,38,.13);--dangerTx:#f87171;
+  --warn:#f59e0b;--warnBg:rgba(245,158,11,.13);--warnTx:#fcd34d;
+  --infoBg:rgba(37,99,235,.12);--infoTx:#60a5fa;
+  --sidebar:linear-gradient(180deg,#08101e 0%,#0f172a 100%);
+  --topbar:rgba(11,17,32,.96);--inp:#0f172a;--inpF:#0d1526;
+  --rowH:#17243a;--codeBg:#060d1a;--scroll:#2d3f55;
+  --thBg:#1a2640;--toggleOff:#1e293b;
+  --bblu-bg:rgba(37,99,235,.14);--bblu-tx:#60a5fa;
+  --bgrn-bg:rgba(34,197,94,.14);--bgrn-tx:#86efac;
+  --born-bg:rgba(249,115,22,.14);--born-tx:#fdba74;
+  --bvio-bg:rgba(139,92,246,.14);--bvio-tx:#c4b5fd;
+  --bdng-bg:rgba(220,38,38,.14);--bdng-tx:#f87171;
+  --bmut-bg:rgba(100,116,139,.14);--bmut-tx:#94a3b8;
+  --langBg:#0c1526;
+  --pip-bld-bg:rgba(37,99,235,.18);--pip-bld-tx:#60a5fa;
+  --pip-tst-bg:rgba(139,92,246,.18);--pip-tst-tx:#a78bfa;
+  --pip-scn-bg:rgba(245,158,11,.18);--pip-scn-tx:#fcd34d;
+  --pip-dkr-bg:rgba(6,182,212,.18);--pip-dkr-tx:#22d3ee;
+  --pip-dep-bg:rgba(34,197,94,.18);--pip-dep-tx:#86efac;
+  --shadow:rgba(0,0,0,.5);--shadow2:rgba(0,0,0,.65);
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"]{
+  --bg:#f0f4f8;--panel:#ffffff;--panel2:#f1f5f9;--panel3:#e2e8f0;
+  --border:#cbd5e1;--border2:#e2e8f0;
+  --text:#0f172a;--text2:#1e293b;--muted:#64748b;--muted2:#475569;
+  --primary:#2563eb;--primaryH:#1d4ed8;--primaryGlow:rgba(37,99,235,.18);
+  --success:#15803d;--successBg:rgba(21,128,61,.09);--successTx:#15803d;
+  --danger:#dc2626;--dangerBg:rgba(220,38,38,.08);--dangerTx:#b91c1c;
+  --warn:#d97706;--warnBg:rgba(217,119,6,.09);--warnTx:#92400e;
+  --infoBg:rgba(37,99,235,.07);--infoTx:#1d4ed8;
+  --sidebar:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);
+  --topbar:rgba(255,255,255,.97);--inp:#f8fafc;--inpF:#f1f5f9;
+  --rowH:#f8fafc;--codeBg:#f1f5f9;--scroll:#cbd5e1;
+  --thBg:#f1f5f9;--toggleOff:#cbd5e1;
+  --bblu-bg:rgba(37,99,235,.09);--bblu-tx:#1d4ed8;
+  --bgrn-bg:rgba(21,128,61,.09);--bgrn-tx:#15803d;
+  --born-bg:rgba(217,119,6,.09);--born-tx:#92400e;
+  --bvio-bg:rgba(109,40,217,.07);--bvio-tx:#6d28d9;
+  --bdng-bg:rgba(220,38,38,.08);--bdng-tx:#b91c1c;
+  --bmut-bg:rgba(100,116,139,.09);--bmut-tx:#475569;
+  --langBg:#f8fafc;
+  --pip-bld-bg:rgba(37,99,235,.09);--pip-bld-tx:#2563eb;
+  --pip-tst-bg:rgba(109,40,217,.09);--pip-tst-tx:#6d28d9;
+  --pip-scn-bg:rgba(217,119,6,.09);--pip-scn-tx:#b45309;
+  --pip-dkr-bg:rgba(6,148,162,.09);--pip-dkr-tx:#0e7490;
+  --pip-dep-bg:rgba(21,128,61,.09);--pip-dep-tx:#15803d;
+  --shadow:rgba(15,23,42,.1);--shadow2:rgba(15,23,42,.16);
+}
+
+
+/* ── SIDEBAR COLLAPSE ── */
+.sidebar{transition:width .25s cubic-bezier(.4,0,.2,1);}
+.sidebar.collapsed{width:58px;padding:18px 9px;}
+.sidebar.collapsed .brand h2,
+.sidebar.collapsed .brand p,
+.sidebar.collapsed .nav-lbl,
+.sidebar.collapsed .slbl2,
+.sidebar.collapsed .nbadge,
+.sidebar.collapsed .uc-name,
+.sidebar.collapsed .uc-role,
+.sidebar.collapsed .user-chip > div:last-child{display:none;}
+.sidebar.collapsed .ni{justify-content:center;padding:9px;border-left:3px solid transparent;}
+.sidebar.collapsed .ni .ico{width:auto;font-size:17px;}
+.sidebar.collapsed .brand{justify-content:center;}
+.sidebar.collapsed .brand-ico{margin:0;}
+.sidebar.collapsed .user-chip{justify-content:center;}
+.collapse-btn{
+  position:absolute;top:50%;right:-13px;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;
+  background:var(--primary);color:#fff;border:2px solid var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:12px;z-index:30;
+  box-shadow:0 2px 8px var(--shadow);transition:all .2s;
+  flex-shrink:0;
+}
+.collapse-btn:hover{background:var(--primaryH);transform:translateY(-50%) scale(1.1);}
+.sidebar-wrap{position:relative;display:flex;flex-shrink:0;}
+
+.sidebar.collapsed .ni{position:relative;}
+.sidebar.collapsed .ni:hover::after{
+  content: attr(data-tip);
+  position:absolute;left:52px;top:50%;transform:translateY(-50%);
+  background:var(--panel);color:var(--text);border:1px solid var(--border);
+  padding:5px 10px;border-radius:7px;font-size:12px;font-weight:600;
+  white-space:nowrap;z-index:100;pointer-events:none;
+  box-shadow:0 4px 14px var(--shadow);
+}
+
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.shell{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:252px;background:var(--sidebar);
+  border-right:1px solid rgba(255,255,255,.06);
+  padding:18px 12px;display:flex;flex-direction:column;flex-shrink:0;
+}
+.brand{display:flex;gap:11px;align-items:center;margin-bottom:26px;padding:0 4px;}
+.brand-ico{
+  width:40px;height:40px;border-radius:11px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px;color:#fff;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(37,99,235,.35);
+}
+.brand h2{font-size:13.5px;color:#fff;font-weight:700;line-height:1.2;}
+.brand p{color:#475569;font-size:10.5px;margin-top:2px;}
+.nav-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#334155;padding:13px 8px 5px;}
+.nav-menu{display:flex;flex-direction:column;gap:1px;}
+.ni{
+  display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;
+  color:#94a3b8;font-size:12.5px;font-weight:500;cursor:pointer;
+  border-left:3px solid transparent;transition:all .18s;
+}
+.ni:hover{background:rgba(255,255,255,.06);color:#e2e8f0;}
+.ni.active{background:rgba(37,99,235,.17);color:#93c5fd;border-left-color:#3b82f6;}
+.ni .ico{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.ni .nbadge{margin-left:auto;background:rgba(220,38,38,.9);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;}
+.sb-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);}
+.user-chip{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:9px;cursor:pointer;}
+.user-chip:hover{background:rgba(255,255,255,.06);}
+.ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.uc-name{font-size:12px;font-weight:600;color:#e2e8f0;}
+.uc-role{font-size:10px;color:#475569;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{
+  height:58px;border-bottom:1px solid var(--border);
+  background:var(--topbar);backdrop-filter:blur(12px);
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 22px;position:sticky;top:0;z-index:20;
+}
+.tb-title{font-size:16px;font-weight:700;color:var(--text);}
+.tb-right{display:flex;align-items:center;gap:9px;}
+
+/* ── THEME TOGGLE ── */
+.theme-btn{
+  display:flex;align-items:center;gap:8px;padding:6px 13px;
+  border-radius:20px;background:var(--panel2);border:1px solid var(--border);
+  cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);
+  transition:all .2s;user-select:none;
+}
+.theme-btn:hover{border-color:var(--primary);color:var(--text);}
+.track{
+  width:36px;height:19px;border-radius:10px;background:var(--toggleOff);
+  position:relative;transition:background .25s;flex-shrink:0;
+}
+[data-theme="dark"] .track{background:#2563eb;}
+.knob{
+  width:15px;height:15px;border-radius:50%;background:#fff;
+  position:absolute;top:2px;left:2px;
+  transition:left .22s;box-shadow:0 1px 3px rgba(0,0,0,.35);
+}
+[data-theme="dark"] .knob{left:19px;}
+.tb-ico{
+  width:33px;height:33px;border-radius:8px;
+  background:var(--panel2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;color:var(--muted2);transition:all .2s;
+}
+.tb-ico:hover{border-color:var(--primary);color:var(--text);}
+
+.page{padding:22px;overflow-y:auto;flex:1;}
+
+/* ── WIZARD LAYOUT ── */
+.wiz-grid{display:grid;grid-template-columns:208px 1fr;gap:18px;align-items:start;}
+.step-nav{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:9px;position:sticky;top:76px;}
+.sni{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;margin-bottom:1px;transition:all .18s;}
+.sni:hover{background:var(--panel2);}
+.sni.active{background:var(--infoBg);}
+.sni.done .snum{background:var(--success);color:#fff;}
+.snum{width:21px;height:21px;border-radius:50%;background:var(--panel3);display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .18s;}
+.sni.active .snum{background:#2563eb;color:#fff;}
+.slbl{font-size:11.5px;font-weight:500;color:var(--text2);}
+.sni.active .slbl{color:var(--infoTx);}
+
+.step-panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:26px;}
+.pane{display:none;}
+.pane.active{display:block;}
+.pane h2{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.pane .pdesc{color:var(--muted2);font-size:13px;margin-bottom:20px;}
+
+/* ── FORM ── */
+label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;}
+.inp,.sel,textarea{
+  width:100%;padding:9px 12px;background:var(--inp);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);outline:none;font-size:13px;font-family:inherit;
+  transition:border-color .18s,background .18s,box-shadow .18s;
+}
+.inp:focus,.sel:focus,textarea:focus{border-color:var(--primary);background:var(--inpF);box-shadow:0 0 0 3px var(--primaryGlow);}
+.sel option{background:var(--panel);}
+.fr{margin-bottom:14px;}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;}
+
+/* ── CHOICE CARDS ── */
+.choices{display:flex;flex-direction:column;gap:7px;}
+.choice{
+  display:flex;align-items:center;gap:11px;padding:11px 13px;
+  border:1px solid var(--border);border-radius:9px;cursor:pointer;
+  background:var(--inp);transition:all .18s;
+}
+.choice:hover{border-color:var(--primary);background:var(--infoBg);}
+.choice input{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;}
+.choice strong{display:block;font-size:13px;color:var(--text);}
+.choice span{font-size:11px;color:var(--muted2);}
+
+/* ── LANG GRID ── */
+.lgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:16px;}
+.lcard{
+  padding:13px 8px;border:2px solid var(--border);border-radius:11px;
+  cursor:pointer;text-align:center;background:var(--langBg);transition:all .18s;
+}
+.lcard:hover{border-color:var(--primary);background:var(--infoBg);}
+.lcard.sel2{border-color:var(--primary);background:var(--infoBg);box-shadow:0 0 0 3px var(--primaryGlow);}
+.lcard .li{font-size:24px;margin-bottom:5px;}
+.lcard .ln{font-size:11.5px;font-weight:600;color:var(--text2);}
+.lcard.sel2 .ln{color:var(--infoTx);}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 17px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .18s;display:inline-flex;align-items:center;gap:6px;}
+.btn-pri{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.3);}
+.btn-pri:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(37,99,235,.4);}
+.btn-sec{background:var(--panel2);color:var(--text2);border:1px solid var(--border);}
+.btn-sec:hover{background:var(--panel3);color:var(--text);border-color:var(--border2);}
+.btn-ok{background:var(--success);color:#fff;}
+.btn-ok:hover{filter:brightness(1.1);}
+.btn-dng{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-dng:hover{background:var(--dangerBg);}
+.bsm{padding:5px 11px;font-size:12px;}
+
+.sf{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* ── YAML ── */
+.ytabs{display:flex;gap:3px;border-bottom:1px solid var(--border);}
+.ytab{padding:6px 15px;font-size:12px;font-weight:600;cursor:pointer;border-radius:7px 7px 0 0;color:var(--muted);border:1px solid transparent;border-bottom:none;transition:all .18s;}
+.ytab.active{background:var(--codeBg);color:var(--infoTx);border-color:var(--border);}
+.ybox{background:var(--codeBg);border:1px solid var(--border);border-top:none;border-radius:0 0 11px 11px;padding:16px;max-height:440px;overflow-y:auto;}
+pre.y{font-family:"Cascadia Code","Fira Code","JetBrains Mono",Consolas,monospace;font-size:11.5px;line-height:1.7;white-space:pre;color:var(--text);}
+
+/* ── REVIEW ── */
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
+.rcard{background:var(--inp);border:1px solid var(--border);border-radius:9px;padding:12px 13px;}
+.rlbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:2px;font-weight:600;}
+.rval{font-size:13.5px;font-weight:700;color:var(--text);}
+
+/* ── PIPELINE VISUAL ── */
+.pviz{display:flex;align-items:center;margin:16px 0;overflow-x:auto;padding:10px 0;}
+.pstage{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:68px;}
+.pico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.plbl{font-size:10px;font-weight:600;color:var(--muted);text-align:center;}
+.parr{color:var(--border);font-size:17px;margin:0 5px;margin-top:-16px;}
+.pi-bld{background:var(--pip-bld-bg);color:var(--pip-bld-tx);}
+.pi-tst{background:var(--pip-tst-bg);color:var(--pip-tst-tx);}
+.pi-scn{background:var(--pip-scn-bg);color:var(--pip-scn-tx);}
+.pi-dkr{background:var(--pip-dkr-bg);color:var(--pip-dkr-tx);}
+.pi-dep{background:var(--pip-dep-bg);color:var(--pip-dep-tx);}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.bblu{background:var(--bblu-bg);color:var(--bblu-tx);}
+.bgrn{background:var(--bgrn-bg);color:var(--bgrn-tx);}
+.born{background:var(--born-bg);color:var(--born-tx);}
+.bvio{background:var(--bvio-bg);color:var(--bvio-tx);}
+.bdng{background:var(--bdng-bg);color:var(--bdng-tx);}
+.bmut{background:var(--bmut-bg);color:var(--bmut-tx);}
+
+/* ── TABLE ── */
+.dtbl{width:100%;border-collapse:collapse;font-size:13px;}
+.dtbl thead tr{background:var(--thBg);}
+.dtbl thead th{padding:11px 15px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.dtbl thead th:first-child{padding-left:18px;}
+.dtbl tbody tr{border-bottom:1px solid var(--border);transition:background .14s;}
+.dtbl tbody tr:hover{background:var(--rowH);}
+.dtbl tbody td{padding:11px 15px;color:var(--text2);}
+.dtbl tbody td:first-child{padding-left:18px;}
+.twrap{background:var(--panel);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
+
+/* ── CARD ── */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px;}
+.card-sm{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:14px;}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.ct{font-size:14px;font-weight:700;color:var(--text);}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.st{font-size:19px;font-weight:700;color:var(--text);}
+.sd{font-size:13px;color:var(--muted2);margin-top:2px;}
+
+/* ── STAT CARD ── */
+.scard{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px;position:relative;overflow:hidden;}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc,#2563eb);}
+.sv{font-size:28px;font-weight:800;line-height:1;margin:7px 0 3px;}
+.slb{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;}
+.ssb{font-size:12px;color:var(--muted2);}
+
+/* ── DOWNLOAD GRID ── */
+.dlgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:11px;margin-top:14px;}
+.dlcard{background:var(--inp);border:1px solid var(--border);border-radius:11px;padding:15px;display:flex;flex-direction:column;gap:9px;}
+
+/* ── PROGRESS ── */
+.prog{height:5px;background:var(--panel3);border-radius:3px;overflow:hidden;}
+.progf{height:100%;border-radius:3px;transition:width .4s;}
+
+/* ── TOGGLE ── */
+.tog{width:42px;height:22px;border-radius:11px;background:var(--toggleOff);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.tog.on{background:#2563eb;}
+.togd{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.tog.on .togd{left:23px;}
+
+/* ── INFO BANNER ── */
+.ibanner{background:var(--infoBg);border:1px solid rgba(37,99,235,.22);border-radius:9px;padding:11px 15px;margin-bottom:14px;display:flex;align-items:center;gap:11px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:18px;right:18px;z-index:9999;
+  background:var(--panel);color:var(--text);border:1px solid var(--border);
+  padding:12px 17px;border-radius:11px;font-size:13px;
+  transform:translateX(400px);transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 8px 30px var(--shadow2);max-width:320px;
+  border-left:4px solid var(--success);
+}
+.toast.show{transform:translateX(0);}
+.toast.terr{border-left-color:var(--danger);}
+.toast.tinf{border-left-color:var(--primary);}
+
+/* ── APR CARD ── */
+.aprc{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:11px;}
+.aprc.phi{border-color:rgba(220,38,38,.35);}
+.aprc.pmd{border-color:rgba(245,158,11,.28);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:3px;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+<div class="shell">
+
+<!-- ════ SIDEBAR ════ -->
+<div class="sidebar-wrap"><aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-ico">⚙</div>
+    <div><h2>DevOps Platform</h2><p>Enterprise Self-Service</p></div>
+  </div>
+
+  <div class="nav-lbl">Workspace</div>
+  <nav class="nav-menu">
+    <div class="ni active" id="nav-dashboard" data-tip="Dashboard"    onclick="go('dashboard')">   <span class="ico">📊</span><span class="slbl2"> Dashboard</span></div>
+    <div class="ni"        id="nav-pipeline" data-tip="Pipeline Builder"      onclick="go('pipeline')">    <span class="ico">🚀</span><span class="slbl2"> Pipeline Builder</span></div>
+    <div class="ni"        id="nav-onboarding" data-tip="App Onboarding"    onclick="go('onboarding')">  <span class="ico">🆕</span><span class="slbl2"> App Onboarding</span></div>
+    <div class="ni"        id="nav-applications" data-tip="Applications"  onclick="go('applications')"><span class="ico">📦</span><span class="slbl2"> Applications</span></div>
+  </nav>
+
+  <div class="nav-lbl">Infrastructure</div>
+  <nav class="nav-menu">
+    <div class="ni" id="nav-clusters" data-tip="Clusters" onclick="go('clusters')"><span class="ico">☸️</span><span class="slbl2"> Clusters</span></div>
+    <div class="ni" id="nav-secrets" data-tip="Secrets"  onclick="go('secrets')"> <span class="ico">🔑</span><span class="slbl2"> Secrets</span></div>
+  </nav>
+
+  <div class="nav-lbl">Operations</div>
+  <nav class="nav-menu">
+    <div class="ni" id="nav-approvals" data-tip="Approvals" onclick="go('approvals')"><span class="ico">✅</span><span class="slbl2"> Approvals</span><span class="nbadge">5</span></div>
+    <div class="ni" id="nav-auditlogs" data-tip="Audit Logs" onclick="go('auditlogs')"><span class="ico">📋</span><span class="slbl2"> Audit Logs</span></div>
+  </nav>
+
+  <div class="nav-lbl">Platform</div>
+  <nav class="nav-menu">
+    <div class="ni" id="nav-templates" data-tip="Templates"  onclick="go('templates')"><span class="ico">📄</span><span class="slbl2"> Templates</span></div>
+    <div class="ni" id="nav-admin" data-tip="Admin"    onclick="go('admin')">   <span class="ico">🛠</span><span class="slbl2"> Admin</span></div>
+    <div class="ni" id="nav-settings" data-tip="Settings" onclick="go('settings')"><span class="ico">⚙️</span><span class="slbl2"> Settings</span></div>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="user-chip">
+      <div class="ava">PA</div>
+      <div><div class="uc-name">Platform Admin</div><div class="uc-role">admin@company.com</div></div>
+    </div>
+  </div>
+  <div class="collapse-btn" id="collapse-btn" onclick="toggleSidebar()" title="Toggle sidebar">◀</div>
+</aside></div>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+  <header class="topbar">
+    <div class="tb-title" id="pg-title">📊 Dashboard</div>
+    <div class="tb-right">
+      <div class="theme-btn" onclick="toggleTheme()">
+        <span id="th-icon">☀️</span>
+        <div class="track"><div class="knob"></div></div>
+        <span id="th-lbl">Light Mode</span>
+      </div>
+      <div class="tb-ico" title="Notifications">🔔</div>
+      <div class="tb-ico" title="Help">❓</div>
+    </div>
+  </header>
+
+  <!-- PAGES -->
+  <div id="page-dashboard"   class="page" style="display:none;"></div>
+
+  <!-- ── PIPELINE WIZARD ── -->
+  <div id="page-pipeline" class="page" style="display:none;">
+    <div class="wiz-grid">
+      <div class="step-nav" id="stepnav"></div>
+      <div class="step-panel">
+
+        <!-- S1 Project -->
+        <div class="pane active" id="p0">
+          <h2>Project Details</h2><p class="pdesc">Basic information about your project and repository.</p>
+          <div class="fg"><div class="fr"><label>Project Name</label><input class="inp" id="pName" value="payments-api"></div>
+            <div class="fr"><label>Team</label><input class="inp" id="pTeam" value="platform-team"></div></div>
+          <div class="fr"><label>Repository URL</label><input class="inp" id="pRepo" value="https://gitlab.company.com/platform/payments-api"></div>
+          <div class="fg"><div class="fr"><label>Branch</label><input class="inp" id="pBranch" value="main"></div>
+            <div class="fr"><label>Environment</label><select class="inp sel" id="pEnv"><option>dev</option><option>qa</option><option>staging</option><option selected>prod</option></select></div></div>
+          <div class="sf"><span></span><button class="btn btn-pri" onclick="ns()">Next: Lifecycle →</button></div>
+        </div>
+
+        <!-- S2 Lifecycle -->
+        <div class="pane" id="p1">
+          <h2>Lifecycle Mode</h2><p class="pdesc">New application or existing deployment?</p>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="lc" value="new" checked>
+              <div><strong>New Application Onboarding</strong><span>Provision namespace, RBAC, secrets and pipeline from scratch</span></div></label>
+            <label class="choice"><input type="radio" name="lc" value="existing">
+              <div><strong>Existing Deployment</strong><span>Add or update pipeline for a project already running</span></div></label>
+            <label class="choice"><input type="radio" name="lc" value="migration">
+              <div><strong>Migration</strong><span>Migrating from Jenkins, GitHub Actions, CircleCI, etc.</span></div></label>
+          </div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Technology →</button></div>
+        </div>
+
+        <!-- S3 Technology -->
+        <div class="pane" id="p2">
+          <h2>Technology Stack</h2><p class="pdesc">Select language, build tool and runtime.</p>
+          <label style="margin-bottom:9px;">Language</label>
+          <div class="lgrid">
+            <div class="lcard sel2" id="lc-java"   onclick="selLang('java')"  ><div class="li">☕</div><div class="ln">Java</div></div>
+            <div class="lcard"      id="lc-nodejs"  onclick="selLang('nodejs')"><div class="li">🟢</div><div class="ln">Node.js</div></div>
+            <div class="lcard"      id="lc-python"  onclick="selLang('python')"><div class="li">🐍</div><div class="ln">Python</div></div>
+            <div class="lcard"      id="lc-go"      onclick="selLang('go')"   ><div class="li">🐹</div><div class="ln">Go</div></div>
+            <div class="lcard"      id="lc-dotnet"  onclick="selLang('dotnet')"><div class="li">🔷</div><div class="ln">.NET</div></div>
+          </div>
+          <div class="ibanner" id="lbanner">
+            <span id="lb-ico" style="font-size:21px;">☕</span>
+            <div><div id="lb-title" style="font-size:13px;font-weight:700;color:var(--infoTx);">Java</div>
+              <div id="lb-desc" style="font-size:11.5px;color:var(--muted2);">Maven/Gradle · JAR/WAR/EAR · JDK 11/17/21</div></div>
+          </div>
+          <div class="fg">
+            <div class="fr"><label id="btl">Build Tool</label><select class="inp sel" id="pBuildTool"><option>Maven</option><option>Gradle</option></select></div>
+            <div class="fr"><label id="pkl">Packaging</label><select class="inp sel" id="pPkg"><option>JAR</option><option>WAR</option><option>EAR</option></select></div>
+          </div>
+          <div class="fr"><label id="rtl">Runtime</label><select class="inp sel" id="pRuntime"><option>17 (LTS)</option><option>21 (LTS)</option><option>11</option></select></div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Security →</button></div>
+        </div>
+
+        <!-- S4 Security -->
+        <div class="pane" id="p3">
+          <h2>Security Scans</h2><p class="pdesc">Select scanning tools to include in the pipeline.</p>
+          <div class="choices">
+            <label class="choice"><input type="checkbox" id="sc-sonar" checked><div><strong>SonarQube</strong><span>Code quality analysis and coverage gates</span></div></label>
+            <label class="choice"><input type="checkbox" id="sc-sast"  checked><div><strong>SAST (GitLab)</strong><span>Built-in static application security testing</span></div></label>
+            <label class="choice"><input type="checkbox" id="sc-dep"   checked><div><strong>Dependency Scan</strong><span>Scan third-party libraries for known CVEs</span></div></label>
+            <label class="choice"><input type="checkbox" id="sc-sec"   checked><div><strong>Secret Detection</strong><span>Prevent committing passwords, tokens, API keys</span></div></label>
+            <label class="choice"><input type="checkbox" id="sc-trivy" checked><div><strong>Trivy Container Scan</strong><span>Scan Docker image for OS &amp; library vulnerabilities</span></div></label>
+            <label class="choice"><input type="checkbox" id="sc-iac"        ><div><strong>IaC Scan (Checkov)</strong><span>Analyse Terraform, Helm, Kubernetes manifests</span></div></label>
+          </div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Container →</button></div>
+        </div>
+
+        <!-- S5 Container -->
+        <div class="pane" id="p4">
+          <h2>Container Build</h2><p class="pdesc">Docker image build configuration.</p>
+          <div class="fg">
+            <div class="fr"><label>Docker Enabled</label><select class="inp sel" id="pDocker"><option>Yes</option><option>No</option></select></div>
+            <div class="fr"><label>Dockerfile Path</label><input class="inp" id="pDockerfile" value="Dockerfile"></div>
+          </div>
+          <div class="fg">
+            <div class="fr"><label>Image Tag Strategy</label>
+              <select class="inp sel" id="pTagStrat"><option>CI_COMMIT_SHORT_SHA</option><option>semantic-version</option><option>latest</option></select></div>
+            <div class="fr"><label>Multi-stage Build</label>
+              <select class="inp sel" id="pMultistage"><option>Yes — builder + runtime</option><option>No — single stage</option></select></div>
+          </div>
+          <div class="fr"><label>Base Image</label><select class="inp sel" id="pBaseImg">
+            <option>eclipse-temurin:17-jre-alpine</option><option>eclipse-temurin:21-jre-alpine</option><option>distroless/java17</option><option>custom</option>
+          </select></div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Registry →</button></div>
+        </div>
+
+        <!-- S6 Registry -->
+        <div class="pane" id="p5">
+          <h2>Container Registry</h2><p class="pdesc">Where will Docker images be pushed?</p>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="reg" value="gitlab" checked><div><strong>GitLab Container Registry</strong><span>Built-in — zero extra credentials needed</span></div></label>
+            <label class="choice"><input type="radio" name="reg" value="nexus"        ><div><strong>Nexus Repository</strong><span>On-premise registry for air-gapped environments</span></div></label>
+            <label class="choice"><input type="radio" name="reg" value="artifactory"  ><div><strong>JFrog Artifactory</strong><span>Enterprise artifact management</span></div></label>
+            <label class="choice"><input type="radio" name="reg" value="ecr"          ><div><strong>AWS ECR</strong><span>Elastic Container Registry for AWS workloads</span></div></label>
+            <label class="choice"><input type="radio" name="reg" value="gcr"          ><div><strong>GCP Artifact Registry</strong><span>Google Cloud managed registry</span></div></label>
+          </div>
+          <div class="fr" style="margin-top:13px;"><label>Registry URL (override)</label>
+            <input class="inp" id="pRegUrl" placeholder="registry.company.com (leave blank for auto)"></div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Deployment →</button></div>
+        </div>
+
+        <!-- S7 Deployment Target -->
+        <div class="pane" id="p6">
+          <h2>Deployment Target</h2><p class="pdesc">Target platform for deployments.</p>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="dep" value="openshift" checked><div><strong>Red Hat OpenShift</strong><span>Enterprise Kubernetes with RBAC, Routes and SCC</span></div></label>
+            <label class="choice"><input type="radio" name="dep" value="kubernetes"       ><div><strong>Kubernetes (vanilla)</strong><span>Plain K8s with kubectl</span></div></label>
+            <label class="choice"><input type="radio" name="dep" value="helm"             ><div><strong>Helm Chart Deploy</strong><span>Values override per environment</span></div></label>
+            <label class="choice"><input type="radio" name="dep" value="argocd"           ><div><strong>ArgoCD GitOps</strong><span>Sync via GitOps — image tag commit only</span></div></label>
+            <label class="choice"><input type="radio" name="dep" value="eks"              ><div><strong>AWS EKS</strong><span>Elastic Kubernetes Service with IAM auth</span></div></label>
+          </div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Cluster →</button></div>
+        </div>
+
+        <!-- S8 Cluster Config -->
+        <div class="pane" id="p7">
+          <h2>Cluster Configuration</h2><p class="pdesc">Target cluster and namespace details.</p>
+          <div class="fg">
+            <div class="fr"><label>Cluster Name / API URL</label><input class="inp" id="pCluster" value="openshift-prod-01"></div>
+            <div class="fr"><label>Namespace</label><input class="inp" id="pNs" value="payments-prod"></div>
+          </div>
+          <div class="fg">
+            <div class="fr"><label>Route / Ingress Host</label><input class="inp" id="pHost" value="payments.apps.company.com"></div>
+            <div class="fr"><label>Replicas</label><input class="inp" id="pRep" value="3" type="number" min="1"></div>
+          </div>
+          <div class="fg">
+            <div class="fr"><label>CPU Request</label><input class="inp" id="pCpuR" value="250m"></div>
+            <div class="fr"><label>Memory Request</label><input class="inp" id="pMemR" value="512Mi"></div>
+          </div>
+          <div class="fg">
+            <div class="fr"><label>CPU Limit</label><input class="inp" id="pCpuL" value="1"></div>
+            <div class="fr"><label>Memory Limit</label><input class="inp" id="pMemL" value="1Gi"></div>
+          </div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Secrets →</button></div>
+        </div>
+
+        <!-- S9 Secrets -->
+        <div class="pane" id="p8">
+          <h2>Secrets Management</h2><p class="pdesc">How should the pipeline access sensitive credentials?</p>
+          <div class="fr"><label>Secret Source</label>
+            <select class="inp sel" id="pSecSrc" onchange="toggleSec()">
+              <option>GitLab Variables</option><option>HashiCorp Vault</option>
+              <option>Internal CSM</option><option>AWS Secrets Manager</option>
+            </select></div>
+          <div id="sec-vault" style="display:none;">
+            <div class="fg">
+              <div class="fr"><label>Vault URL</label><input class="inp" value="https://vault.company.com"></div>
+              <div class="fr"><label>Auth Method</label><select class="inp sel"><option>JWT/OIDC</option><option>AppRole</option><option>Token</option></select></div>
+            </div>
+            <div class="fr"><label>Secret Path</label><input class="inp" value="secret/data/apps/payments/prod"></div>
+          </div>
+          <div id="sec-csm" style="display:none;">
+            <div class="fg">
+              <div class="fr"><label>CSM URL</label><input class="inp" value="https://internal-csm.company.com"></div>
+              <div class="fr"><label>Auth Type</label><select class="inp sel"><option>Token</option><option>Client Credentials</option><option>JWT</option><option>mTLS</option></select></div>
+            </div>
+            <div class="fr"><label>Secret Path</label><input class="inp" value="/apps/payments/prod/db"></div>
+            <button class="btn btn-sec bsm" onclick="toast('✅ CSM connection successful')">Test Connection</button>
+          </div>
+          <div id="sec-aws" style="display:none;">
+            <div class="fg">
+              <div class="fr"><label>AWS Region</label><input class="inp" value="us-east-1"></div>
+              <div class="fr"><label>IAM Role ARN</label><input class="inp" placeholder="arn:aws:iam::123:role/pipeline-role"></div>
+            </div>
+          </div>
+          <div class="sf"><button class="btn btn-sec" onclick="ps()">← Previous</button><button class="btn btn-pri" onclick="ns()">Next: Review →</button></div>
+        </div>
+
+        <!-- S10 Review -->
+        <div class="pane" id="p9">
+          <h2>Review &amp; Generate</h2><p class="pdesc">Verify configuration and download pipeline package.</p>
+          <div class="pviz" id="pviz"></div>
+          <div class="rgrid" id="rgrid"></div>
+          <div style="margin-top:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+              <strong style="font-size:13.5px;color:var(--text);">Generated Pipeline YAML</strong>
+              <div style="display:flex;gap:7px;">
+                <button class="btn btn-sec bsm" onclick="copyY()">📋 Copy</button>
+                <button class="btn btn-sec bsm" onclick="dlYaml()">⬇ YAML</button>
+                <button class="btn btn-ok  bsm" onclick="dlZip()">📦 ZIP</button>
+              </div>
+            </div>
+            <div class="ytabs" id="ytabs"></div>
+            <div class="ybox"><pre class="y" id="yout"></pre></div>
+          </div>
+          <div style="margin-top:22px;">
+            <strong style="font-size:13.5px;color:var(--text);">📦 Pipeline Package</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:3px;">Includes <code style="background:var(--panel3);padding:1px 5px;border-radius:4px;">.gitlab-ci.yml</code> + security YAMLs + Dockerfile + K8s manifests + README</p>
+            <div class="dlgrid" id="dlgrid"></div>
+          </div>
+          <div class="sf">
+            <button class="btn btn-sec" onclick="ps()">← Previous</button>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sec" onclick="toast('💾 Template saved to library')">💾 Save Template</button>
+              <button class="btn btn-pri" onclick="toast('🚀 Pipeline created in GitLab!')">🔗 Create in GitLab</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /step-panel -->
+    </div><!-- /wiz-grid -->
+  </div><!-- /page-pipeline -->
+
+  <div id="page-onboarding"  class="page" style="display:none;"></div>
+  <div id="page-applications"class="page" style="display:none;"></div>
+  <div id="page-clusters"    class="page" style="display:none;"></div>
+  <div id="page-secrets"     class="page" style="display:none;"></div>
+  <div id="page-approvals"   class="page" style="display:none;"></div>
+  <div id="page-auditlogs"   class="page" style="display:none;"></div>
+  <div id="page-admin"       class="page" style="display:none;"></div>
+  <div id="page-settings"    class="page" style="display:none;"></div>
+  <div id="page-templates"    class="page" style="display:none;"></div>
+</main>
+</div>
+
+<script>
+// ═══════════ THEME ═══════════
+let THEME = localStorage.getItem('dop-theme')||'dark';
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('th-icon').textContent = t==='dark'?'☀️':'🌙';
+  document.getElementById('th-lbl').textContent  = t==='dark'?'Light Mode':'Dark Mode';
+  THEME=t; localStorage.setItem('dop-theme',t);
+}
+function toggleTheme(){ applyTheme(THEME==='dark'?'light':'dark'); }
+applyTheme(THEME);
+
+// ═══════════ ROUTER ═══════════
+const TITLES={dashboard:'📊 Dashboard',pipeline:'🚀 Pipeline Builder',onboarding:'🆕 App Onboarding',
+  applications:'📦 Applications',clusters:'☸️ Clusters',secrets:'🔑 Secrets',
+  approvals:'✅ Approvals',auditlogs:'📋 Audit Logs',admin:'🛠 Admin',settings:'⚙️ Settings',templates:'📄 Pipeline Templates'};
+function go(p){
+  document.querySelectorAll('[id^="page-"]').forEach(e=>e.style.display='none');
+  const pg=document.getElementById('page-'+p);
+  if(pg) pg.style.display='';
+  document.getElementById('pg-title').textContent=TITLES[p]||p;
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const ni=document.getElementById('nav-'+p);
+  if(ni) ni.classList.add('active');
+}
+
+// ═══════════ WIZARD ═══════════
+let CS=0;
+const STEPS=[
+  'Project Details','Lifecycle','Technology','Security','Container',
+  'Registry','Deployment','Cluster Config','Secrets','Review & Generate'
+];
+function buildStepNav(){
+  const nav=document.getElementById('stepnav');
+  nav.innerHTML=STEPS.map((s,i)=>
+    `<div class="sni${i===0?' active':''}" id="sni${i}" onclick="goStep(${i})">
+       <div class="snum">${i+1}</div><span class="slbl">${s}</span></div>`
+  ).join('');
+}
+function goStep(i){
+  document.querySelectorAll('.pane').forEach((p,j)=>p.classList.toggle('active',j===i));
+  document.querySelectorAll('[id^="sni"]').forEach((n,j)=>{
+    n.classList.toggle('active',j===i);
+    n.classList.toggle('done',j<i);
+  });
+  CS=i; if(i===9) buildReview();
+}
+function ns(){ if(CS<9) goStep(CS+1); }
+function ps(){ if(CS>0) goStep(CS-1); }
+
+// ═══════════ LANG ═══════════
+let LANG='java';
+const LM={
+  java:  {ico:'☕',label:'Java',   tc:'var(--born-tx)',desc:'Maven/Gradle · JAR/WAR/EAR · JDK 11/17/21'},
+  nodejs:{ico:'🟢',label:'Node.js',tc:'var(--bgrn-tx)',desc:'npm/yarn/pnpm · CommonJS/ESM · Node 18/20/22'},
+  python:{ico:'🐍',label:'Python', tc:'var(--bblu-tx)',desc:'pip/poetry/uv · wheel/sdist · Python 3.10–3.12'},
+  go:    {ico:'🐹',label:'Go',     tc:'var(--pip-dkr-tx)',desc:'go build/goreleaser · Linux binary · Go 1.20–1.22'},
+  dotnet:{ico:'🔷',label:'.NET',   tc:'var(--bvio-tx)',desc:'dotnet CLI/MSBuild · DLL/exe · .NET 6/7/8'},
+};
+const LO={
+  java:  {tools:['Maven','Gradle'],    pkg:['JAR','WAR','EAR'],     rt:['17 (LTS)','21 (LTS)','11'],        btl:'Build Tool',pkl:'Packaging',rtl:'JDK Version', imgs:['eclipse-temurin:17-jre-alpine','eclipse-temurin:21-jre-alpine','distroless/java17','custom']},
+  nodejs:{tools:['npm','yarn','pnpm'],  pkg:['JS bundle','CommonJS'], rt:['20 LTS','18 LTS','22'],            btl:'Package Mgr',pkl:'Module Format',rtl:'Node Version',imgs:['node:20-alpine','node:18-alpine','node:22-alpine','custom']},
+  python:{tools:['pip','poetry','uv'],  pkg:['wheel','sdist','none'], rt:['3.12','3.11','3.10'],              btl:'Package Mgr',pkl:'Distribution',rtl:'Python Ver',  imgs:['python:3.12-slim','python:3.11-slim','custom']},
+  go:    {tools:['go build','goreleaser'],pkg:['binary','archive'],  rt:['1.22','1.21','1.20'],              btl:'Build Tool',pkl:'Output',rtl:'Go Version',imgs:['golang:1.22-alpine','gcr.io/distroless/base','scratch','custom']},
+  dotnet:{tools:['dotnet CLI','MSBuild'],pkg:['DLL','exe','NuGet'],  rt:['.NET 8','.NET 6 LTS','.NET 7'],   btl:'Build Tool',pkl:'Output Type',rtl:'.NET SDK',imgs:['mcr.microsoft.com/dotnet/aspnet:8.0','mcr.microsoft.com/dotnet/aspnet:6.0','custom']},
+};
+function selLang(l){
+  LANG=l;
+  document.querySelectorAll('.lcard').forEach(c=>c.classList.remove('sel2'));
+  document.getElementById('lc-'+l)?.classList.add('sel2');
+  const o=LO[l],m=LM[l];
+  document.getElementById('pBuildTool').innerHTML=o.tools.map(t=>`<option>${t}</option>`).join('');
+  document.getElementById('pPkg').innerHTML=o.pkg.map(p=>`<option>${p}</option>`).join('');
+  document.getElementById('pRuntime').innerHTML=o.rt.map(r=>`<option>${r}</option>`).join('');
+  document.getElementById('pBaseImg').innerHTML=o.imgs.map(i=>`<option>${i}</option>`).join('');
+  document.getElementById('btl').textContent=o.btl;
+  document.getElementById('pkl').textContent=o.pkl;
+  document.getElementById('rtl').textContent=o.rtl;
+  document.getElementById('lb-ico').textContent=m.ico;
+  document.getElementById('lb-title').textContent=m.label;
+  document.getElementById('lb-title').style.color=m.tc;
+  document.getElementById('lb-desc').textContent=m.desc;
+}
+function toggleSec(){
+  const v=document.getElementById('pSecSrc').value;
+  document.getElementById('sec-vault').style.display=v==='HashiCorp Vault'?'block':'none';
+  document.getElementById('sec-csm').style.display=v==='Internal CSM'?'block':'none';
+  document.getElementById('sec-aws').style.display=v==='AWS Secrets Manager'?'block':'none';
+}
+
+// ═══════════ CONFIG ═══════════
+function cfg(){
+  const v=id=>document.getElementById(id)?.value||'';
+  const ch=id=>document.getElementById(id)?.checked||false;
+  const rd=n=>document.querySelector(`input[name="${n}"]:checked`)?.value||'';
+  return{
+    proj:v('pName')||'my-service', team:v('pTeam')||'platform', repo:v('pRepo'),
+    branch:v('pBranch')||'main', env:v('pEnv')||'prod',
+    lc:rd('lc')||'new', lang:LANG,
+    bt:v('pBuildTool')||'Maven', pkg:v('pPkg')||'JAR', rt:v('pRuntime')||'17 (LTS)',
+    sonar:ch('sc-sonar'), sast:ch('sc-sast'), dep:ch('sc-dep'),
+    sec:ch('sc-sec'), trivy:ch('sc-trivy'), iac:ch('sc-iac'),
+    docker:v('pDocker')==='Yes', df:v('pDockerfile')||'Dockerfile',
+    tag:v('pTagStrat'), multi:v('pMultistage'),
+    baseImg:v('pBaseImg')||'eclipse-temurin:17-jre-alpine',
+    reg:rd('reg')||'gitlab', regUrl:v('pRegUrl'),
+    deploy:rd('dep')||'openshift',
+    cluster:v('pCluster')||'cluster-01', ns:v('pNs')||'default',
+    host:v('pHost'), rep:v('pRep')||'3',
+    cpuR:v('pCpuR')||'250m', memR:v('pMemR')||'512Mi',
+    cpuL:v('pCpuL')||'1',    memL:v('pMemL')||'1Gi',
+    secSrc:v('pSecSrc')||'GitLab Variables',
+  };
+}
+
+// ═══════════ YAML BUILDERS ═══════════
+function secInc(c){
+  const L=[];
+  if(c.sonar) L.push('  - project: platform/templates\n    file: security/sonar.yml');
+  if(c.sast)  L.push('  - template: Jobs/SAST.gitlab-ci.yml');
+  if(c.dep)   L.push('  - template: Jobs/Dependency-Scanning.gitlab-ci.yml');
+  if(c.sec)   L.push('  - template: Jobs/Secret-Detection.gitlab-ci.yml');
+  if(c.trivy) L.push('  - project: platform/templates\n    file: security/trivy.yml');
+  if(c.iac)   L.push('  - project: platform/templates\n    file: security/checkov.yml');
+  return L.length?'\n'+L.join('\n'):'';
+}
+function dkrBlock(c){
+  if(!c.docker) return '';
+  const R={gitlab:'$CI_REGISTRY',nexus:'$NEXUS_URL',artifactory:'$ARTIFACTORY_URL',ecr:'$ECR_REGISTRY',gcr:'$GCR_REGISTRY'};
+  const r=c.regUrl||(R[c.reg]||'$REGISTRY_URL');
+  return`
+docker_build:
+  image: docker:26
+  stage: docker
+  services:
+    - docker:26-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+    IMAGE_FULL: ${r}/${c.proj}:$IMAGE_TAG
+  before_script:
+    - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" ${r}
+  script:
+    - docker build -f ${c.df} -t $IMAGE_FULL .
+    - docker push $IMAGE_FULL
+  rules:
+    - if: '$CI_COMMIT_BRANCH'`;
+}
+function depBlock(c){
+  const D={
+    openshift:`
+openshift_deploy:
+  image: quay.io/openshift/origin-cli:latest
+  stage: deploy
+  environment:
+    name: ${c.env}
+    url: https://${c.host||c.proj+'.apps.company.com'}
+  before_script:
+    - oc login "$OPENSHIFT_API" --token="$OPENSHIFT_TOKEN" --insecure-skip-tls-verify=true
+    - oc project ${c.ns}
+  script:
+    - oc set image deployment/${c.proj} app=$IMAGE_FULL --record
+    - oc rollout status deployment/${c.proj} --timeout=5m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    kubernetes:`
+kubectl_deploy:
+  image: bitnami/kubectl:latest
+  stage: deploy
+  environment:
+    name: ${c.env}
+  script:
+    - kubectl config use-context $KUBE_CONTEXT
+    - kubectl set image deployment/${c.proj} app=$IMAGE_FULL -n ${c.ns}
+    - kubectl rollout status deployment/${c.proj} -n ${c.ns}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    helm:`
+helm_deploy:
+  image: alpine/helm:3.14.0
+  stage: deploy
+  environment:
+    name: ${c.env}
+  script:
+    - helm upgrade --install ${c.proj} ./charts/${c.proj}
+        --namespace ${c.ns}
+        --set image.tag=$IMAGE_TAG
+        --set replicas=${c.rep}
+        --set resources.requests.cpu=${c.cpuR}
+        --set resources.requests.memory=${c.memR}
+        -f charts/${c.proj}/values-${c.env}.yaml
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    argocd:`
+argocd_sync:
+  image: argoproj/argocd:latest
+  stage: deploy
+  script:
+    - argocd login "$ARGOCD_SERVER" --auth-token="$ARGOCD_TOKEN" --grpc-web
+    - yq e '.spec.source.helm.parameters[] |= select(.name == "image.tag").value = strenv(IMAGE_TAG)' -i gitops/${c.proj}/values.yaml
+    - git commit -am "ci: bump ${c.proj} to $IMAGE_TAG" && git push
+    - argocd app sync ${c.proj} --timeout 300
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+    eks:`
+eks_deploy:
+  image: amazon/aws-cli:latest
+  stage: deploy
+  before_script:
+    - aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER"
+  script:
+    - kubectl set image deployment/${c.proj} app=$IMAGE_FULL -n ${c.ns}
+    - kubectl rollout status deployment/${c.proj} -n ${c.ns}
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "${c.branch}"'`,
+  };
+  return D[c.deploy]||D.openshift;
+}
+
+// per-language YAMLs
+const YAMLS={
+  java:c=>`# ══════════════════════════════════════════════════
+# GitLab CI/CD  —  Java / ${c.bt}   (${c.rt})
+# Project : ${c.proj}    Team: ${c.team}
+# Target  : ${c.deploy} / ${c.ns}
+# Generated ${new Date().toISOString().slice(0,10)}
+# ══════════════════════════════════════════════════
+
+include:${secInc(c)}
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2"
+  JAVA_VERSION: "${c.rt.replace(' (LTS)','')}"
+  APP_NAME: "${c.proj}"
+  KUBE_NAMESPACE: "${c.ns}"
+
+stages: [build, test, scan, docker, deploy]
+
+maven_build:
+  image: maven:3.9.6-eclipse-temurin-${c.rt.includes('21')?'21':'17'}
+  stage: build
+  cache:
+    key: "$CI_PROJECT_PATH-m2"
+    paths: [.m2/repository]
+  script:
+    - mvn clean package -DskipTests --batch-mode
+  artifacts:
+    name: "${c.proj}-$CI_COMMIT_SHORT_SHA"
+    paths: [target/*.jar, target/*.war]
+    expire_in: 7 days
+
+unit_tests:
+  image: maven:3.9.6-eclipse-temurin-${c.rt.includes('21')?'21':'17'}
+  stage: test
+  script:
+    - mvn test --batch-mode
+  artifacts:
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
+    paths: [target/site/jacoco]
+  coverage: '/Total.*?([0-9]{1,3})%/'
+${dkrBlock(c)}
+${depBlock(c)}`,
+
+  nodejs:c=>`# ══════════════════════════════════════════════════
+# GitLab CI/CD  —  Node.js / ${c.bt}
+# Project : ${c.proj}    Team: ${c.team}
+# Generated ${new Date().toISOString().slice(0,10)}
+# ══════════════════════════════════════════════════
+
+include:${secInc(c)}
+
+variables:
+  NODE_ENV: production
+  APP_NAME: "${c.proj}"
+  KUBE_NAMESPACE: "${c.ns}"
+
+stages: [install, build, test, scan, docker, deploy]
+
+install_deps:
+  image: node:${c.rt.includes('22')?'22':c.rt.includes('18')?'18':'20'}-alpine
+  stage: install
+  cache:
+    key: {files: [package-lock.json]}
+    paths: [node_modules/]
+  script:
+    - ${c.bt==='yarn'?'yarn install --frozen-lockfile':c.bt==='pnpm'?'pnpm install --frozen-lockfile':'npm ci'}
+  artifacts:
+    paths: [node_modules/]
+    expire_in: 1 hour
+
+npm_build:
+  image: node:${c.rt.includes('22')?'22':c.rt.includes('18')?'18':'20'}-alpine
+  stage: build
+  script:
+    - ${c.bt==='yarn'?'yarn build':c.bt==='pnpm'?'pnpm build':'npm run build'}
+  artifacts:
+    paths: [dist/]
+    expire_in: 7 days
+
+unit_tests:
+  image: node:${c.rt.includes('22')?'22':c.rt.includes('18')?'18':'20'}-alpine
+  stage: test
+  script:
+    - ${c.bt==='yarn'?'yarn test --ci':'npm test -- --ci --coverage'}
+  coverage: '/Statements.*?([0-9]{1,3})%/'
+${dkrBlock(c)}
+${depBlock(c)}`,
+
+  python:c=>`# ══════════════════════════════════════════════════
+# GitLab CI/CD  —  Python / ${c.bt}
+# Project : ${c.proj}    Team: ${c.team}
+# Generated ${new Date().toISOString().slice(0,10)}
+# ══════════════════════════════════════════════════
+
+include:${secInc(c)}
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHON_VERSION: "${c.rt}"
+  APP_NAME: "${c.proj}"
+  KUBE_NAMESPACE: "${c.ns}"
+
+stages: [install, lint, test, scan, docker, deploy]
+
+install_deps:
+  image: python:${c.rt.split(' ')[0]}-slim
+  stage: install
+  cache:
+    key: "$CI_PROJECT_PATH-pip"
+    paths: [.cache/pip, .venv/]
+  script:
+    - python -m venv .venv
+    - source .venv/bin/activate
+    - ${c.bt==='poetry'?'pip install poetry && poetry install':'pip install -r requirements.txt'}
+  artifacts:
+    paths: [.venv/]
+    expire_in: 1 hour
+
+lint:
+  image: python:${c.rt.split(' ')[0]}-slim
+  stage: lint
+  script:
+    - source .venv/bin/activate
+    - pip install flake8 black
+    - flake8 . --max-line-length=120
+    - black --check .
+  allow_failure: true
+
+unit_tests:
+  image: python:${c.rt.split(' ')[0]}-slim
+  stage: test
+  script:
+    - source .venv/bin/activate
+    - pip install pytest pytest-cov
+    - pytest --cov=. --cov-report=xml --junitxml=junit.xml -v
+  artifacts:
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  coverage: '/TOTAL.*? (\\d+%)$/'
+${dkrBlock(c)}
+${depBlock(c)}`,
+
+  go:c=>`# ══════════════════════════════════════════════════
+# GitLab CI/CD  —  Go ${c.rt}
+# Project : ${c.proj}    Team: ${c.team}
+# Generated ${new Date().toISOString().slice(0,10)}
+# ══════════════════════════════════════════════════
+
+include:${secInc(c)}
+
+variables:
+  GOPATH: "$CI_PROJECT_DIR/.go"
+  CGO_ENABLED: "0"
+  GOOS: linux
+  GOARCH: amd64
+  APP_NAME: "${c.proj}"
+  KUBE_NAMESPACE: "${c.ns}"
+
+stages: [build, test, scan, docker, deploy]
+
+go_build:
+  image: golang:${c.rt.split(' ')[0]}-alpine
+  stage: build
+  cache:
+    key: "$CI_PROJECT_PATH-go"
+    paths: [.go/pkg/mod]
+  script:
+    - go mod download
+    - go build -ldflags="-s -w -X main.version=$CI_COMMIT_SHORT_SHA" -o bin/${c.proj} ./cmd/...
+  artifacts:
+    paths: [bin/${c.proj}]
+    expire_in: 7 days
+
+go_test:
+  image: golang:${c.rt.split(' ')[0]}-alpine
+  stage: test
+  script:
+    - go test -v -race -coverprofile=coverage.out ./...
+    - go tool cover -func=coverage.out
+  coverage: '/total:\\s+\\(statements\\)\\s+(\\d+\\.\\d+)%/'
+${dkrBlock(c)}
+${depBlock(c)}`,
+
+  dotnet:c=>`# ══════════════════════════════════════════════════
+# GitLab CI/CD  —  .NET ${c.rt}
+# Project : ${c.proj}    Team: ${c.team}
+# Generated ${new Date().toISOString().slice(0,10)}
+# ══════════════════════════════════════════════════
+
+include:${secInc(c)}
+
+variables:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget"
+  APP_NAME: "${c.proj}"
+  KUBE_NAMESPACE: "${c.ns}"
+
+stages: [restore, build, test, scan, docker, deploy]
+
+nuget_restore:
+  image: mcr.microsoft.com/dotnet/sdk:${c.rt.includes('6')?'6.0':c.rt.includes('7')?'7.0':'8.0'}
+  stage: restore
+  cache:
+    key: "$CI_PROJECT_PATH-nuget"
+    paths: [.nuget/]
+  script:
+    - dotnet restore --packages "$NUGET_PACKAGES"
+
+dotnet_build:
+  image: mcr.microsoft.com/dotnet/sdk:${c.rt.includes('6')?'6.0':c.rt.includes('7')?'7.0':'8.0'}
+  stage: build
+  script:
+    - dotnet build --configuration Release --no-restore
+    - dotnet publish --configuration Release --output publish/
+  artifacts:
+    paths: [publish/]
+    expire_in: 7 days
+
+unit_tests:
+  image: mcr.microsoft.com/dotnet/sdk:${c.rt.includes('6')?'6.0':c.rt.includes('7')?'7.0':'8.0'}
+  stage: test
+  script:
+    - dotnet test --configuration Release --logger "junit;LogFilePath=junit.xml"
+  artifacts:
+    reports:
+      junit: "**/junit.xml"
+  coverage: '/Line coverage: (\\d+\\.\\d+)%/'
+${dkrBlock(c)}
+${depBlock(c)}`,
+};
+
+// ═══════════ REVIEW ═══════════
+function buildReview(){
+  const c=cfg();
+  const stages=[
+    {ico:'🔨',lbl:'Build', cls:'pi-bld'},
+    {ico:'🧪',lbl:'Test',  cls:'pi-tst'},
+    {ico:'🔍',lbl:'Scan',  cls:'pi-scn'},
+    c.docker?{ico:'🐳',lbl:'Docker',cls:'pi-dkr'}:null,
+    {ico:'🚀',lbl:'Deploy',cls:'pi-dep'},
+  ].filter(Boolean);
+  document.getElementById('pviz').innerHTML=stages.map((s,i)=>
+    `${i>0?'<span class="parr">→</span>':''}
+     <div class="pstage"><div class="pico ${s.cls}">${s.ico}</div><div class="plbl">${s.lbl}</div></div>`
+  ).join('');
+  const m=LM[c.lang];
+  const scans=[c.sonar&&'SonarQube',c.trivy&&'Trivy',c.sast&&'SAST',c.dep&&'DepScan',c.sec&&'Secrets',c.iac&&'IaC'].filter(Boolean);
+  document.getElementById('rgrid').innerHTML=[
+    ['Project',c.proj],['Team',c.team],['Language',`${m.ico} ${m.label}`],
+    ['Build Tool',c.bt],['Runtime',c.rt],['Environment',c.env.toUpperCase()],
+    ['Deploy To',c.deploy.toUpperCase()],['Namespace',c.ns],['Replicas',c.rep],
+    ['Registry',c.reg.toUpperCase()],['Secrets',c.secSrc],['Scans',scans.join(', ')||'None'],
+  ].map(([k,v])=>`<div class="rcard"><div class="rlbl">${k}</div><div class="rval">${v}</div></div>`).join('');
+  document.getElementById('ytabs').innerHTML=`<div class="ytab active">${m.ico} ${m.label}</div>`;
+  document.getElementById('yout').textContent=(YAMLS[c.lang]||YAMLS.java)(c);
+  const scCount=scans.length;
+  document.getElementById('dlgrid').innerHTML=`
+    <div class="dlcard">
+      <div style="font-size:22px;">${m.ico}</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);">${m.label} Pipeline</div>
+        <div style="font-size:11px;color:var(--muted);">${c.bt} · ${c.rt}</div>
+        <div style="font-size:11px;color:var(--bgrn-tx);margin-top:3px;">📦 CI + ${scCount} scans + Dockerfile + k8s/</div>
+      </div>
+      <button class="btn btn-ok bsm" style="width:100%;" onclick="dlZip()">⬇ Download ZIP</button>
+    </div>`;
+}
+function copyY(){
+  const c=cfg();
+  navigator.clipboard.writeText((YAMLS[c.lang]||YAMLS.java)(c)).then(()=>toast('📋 Copied!'));
+}
+function dlYaml(){
+  const c=cfg();
+  const b=new Blob([(YAMLS[c.lang]||YAMLS.java)(c)],{type:'text/yaml'});
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(b),download:`${c.proj}-${c.lang}-gitlab-ci.yml`});
+  document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);},500);
+  toast('✅ YAML downloaded');
+}
+function buildDockerfile(c){
+  const D={
+    java:`FROM eclipse-temurin:${c.rt.includes('21')?'21':'17'}-jdk-alpine AS builder\nWORKDIR /app\nCOPY . .\nRUN ${c.bt==='Gradle'?'./gradlew build -x test':'mvn package -DskipTests --batch-mode'}\n\nFROM ${c.baseImg}\nWORKDIR /app\nCOPY --from=builder /app/${c.bt==='Gradle'?'build/libs':'target'}/*.jar app.jar\nEXPOSE 8080\nENTRYPOINT ["java","-jar","app.jar"]\n`,
+    nodejs:`FROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine\nWORKDIR /app\nCOPY --from=builder /app/dist ./dist\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD ["node","dist/index.js"]\n`,
+    python:`FROM python:${c.rt.split(' ')[0]}-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\nCOPY . .\nEXPOSE 8000\nCMD ["uvicorn","app.main:app","--host","0.0.0.0","--port","8000"]\n`,
+    go:`FROM golang:${c.rt.split(' ')[0]}-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 go build -o /app/server ./cmd/server\n\nFROM gcr.io/distroless/base\nCOPY --from=builder /app/server /server\nEXPOSE 8080\nENTRYPOINT ["/server"]\n`,
+    dotnet:`FROM mcr.microsoft.com/dotnet/sdk:${c.rt.includes('6')?'6.0':c.rt.includes('7')?'7.0':'8.0'} AS builder\nWORKDIR /app\nCOPY *.csproj ./\nRUN dotnet restore\nCOPY . .\nRUN dotnet publish -c Release -o /publish\n\nFROM mcr.microsoft.com/dotnet/aspnet:${c.rt.includes('6')?'6.0':c.rt.includes('7')?'7.0':'8.0'}\nWORKDIR /app\nCOPY --from=builder /publish .\nEXPOSE 8080\nENTRYPOINT ["dotnet","${c.proj}.dll"]\n`,
+  };
+  return (D[c.lang]||D.java).replace(/\\n/g,'\n');
+}
+function buildK8sDeploy(c){return`apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: ${c.proj}\n  namespace: ${c.ns}\n  labels:\n    app: ${c.proj}\n    managed-by: devops-platform\nspec:\n  replicas: ${c.rep}\n  selector:\n    matchLabels:\n      app: ${c.proj}\n  template:\n    metadata:\n      labels:\n        app: ${c.proj}\n    spec:\n      containers:\n        - name: app\n          image: REGISTRY/${c.proj}:latest\n          ports:\n            - containerPort: 8080\n          resources:\n            requests:\n              cpu: ${c.cpuR}\n              memory: ${c.memR}\n            limits:\n              cpu: ${c.cpuL}\n              memory: ${c.memL}\n          readinessProbe:\n            httpGet:\n              path: /health\n              port: 8080\n            initialDelaySeconds: 30\n            periodSeconds: 10\n          livenessProbe:\n            httpGet:\n              path: /health\n              port: 8080\n            initialDelaySeconds: 60\n            periodSeconds: 30\n`;}
+function buildK8sSvc(c){return`apiVersion: v1\nkind: Service\nmetadata:\n  name: ${c.proj}\n  namespace: ${c.ns}\nspec:\n  selector:\n    app: ${c.proj}\n  ports:\n    - protocol: TCP\n      port: 80\n      targetPort: 8080\n  type: ClusterIP\n`;}
+function buildOcpRoute(c){return`apiVersion: route.openshift.io/v1\nkind: Route\nmetadata:\n  name: ${c.proj}\n  namespace: ${c.ns}\nspec:\n  host: ${c.host||c.proj+'.apps.company.com'}\n  to:\n    kind: Service\n    name: ${c.proj}\n  port:\n    targetPort: 8080\n  tls:\n    termination: edge\n    insecureEdgeTerminationPolicy: Redirect\n`;}
+function buildIngress(c){return`apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: ${c.proj}\n  namespace: ${c.ns}\n  annotations:\n    nginx.ingress.kubernetes.io/rewrite-target: /\nspec:\n  rules:\n    - host: ${c.host||c.proj+'.company.com'}\n      http:\n        paths:\n          - path: /\n            pathType: Prefix\n            backend:\n              service:\n                name: ${c.proj}\n                port:\n                  number: 80\n`;}
+function buildHelmChart(c){return`apiVersion: v2\nname: ${c.proj}\ndescription: Helm chart for ${c.proj}\ntype: application\nversion: 0.1.0\nappVersion: "1.0.0"\n`;}
+function buildHelmValues(c){return`replicaCount: ${c.rep}\nimage:\n  repository: REGISTRY/${c.proj}\n  tag: latest\n  pullPolicy: IfNotPresent\nresources:\n  requests:\n    cpu: ${c.cpuR}\n    memory: ${c.memR}\n  limits:\n    cpu: ${c.cpuL}\n    memory: ${c.memL}\nservice:\n  type: ClusterIP\n  port: 80\nnamespace: ${c.ns}\ningress:\n  enabled: true\n  host: ${c.host||c.proj+'.company.com'}\n`;}
+function buildSonarYaml(c){return`sonarqube_scan:\n  image:\n    name: sonarsource/sonar-scanner-cli:latest\n    entrypoint: [""]\n  stage: scan\n  variables:\n    SONAR_HOST_URL: "$SONAR_HOST_URL"\n    SONAR_TOKEN: "$SONAR_TOKEN"\n    GIT_DEPTH: "0"\n  script:\n    - sonar-scanner\n        -Dsonar.projectKey=${c.proj}\n        -Dsonar.sources=.\n        -Dsonar.qualitygate.wait=true\n  allow_failure: false\n`;}
+function buildTrivyYaml(c){return`trivy_scan:\n  image:\n    name: aquasec/trivy:latest\n    entrypoint: [""]\n  stage: scan\n  script:\n    - trivy fs --exit-code 0 --no-progress --format table .\n    - trivy image --exit-code 1 --severity CRITICAL,HIGH --no-progress $IMAGE_FULL\n  artifacts:\n    reports:\n      container_scanning: gl-container-scanning-report.json\n`;}
+function buildCheckovYaml(){return`checkov_iac_scan:\n  image: bridgecrew/checkov:latest\n  stage: scan\n  script:\n    - checkov -d ./terraform --quiet || true\n    - checkov -d ./charts --framework helm --quiet || true\n    - checkov -d ./k8s --framework kubernetes --quiet || true\n  allow_failure: true\n`;}
+function buildSonarProps(c){return`sonar.projectKey=${c.proj}\nsonar.projectName=${c.proj}\nsonar.host.url=\${SONAR_HOST_URL}\nsonar.login=\${SONAR_TOKEN}\nsonar.sources=.\nsonar.exclusions=**/node_modules/**,**/.venv/**,**/vendor/**\n`;}
+function buildReadme(c){
+  const m=LM[c.lang];
+  const files=['.gitlab-ci.yml'];
+  if(c.sonar)files.push('security/sonar.yml');
+  if(c.trivy)files.push('security/trivy.yml');
+  if(c.iac)files.push('security/checkov.yml');
+  if(c.sast)files.push('security/sast.yml');
+  if(c.dep)files.push('security/dependency-scanning.yml');
+  if(c.sec)files.push('security/secret-detection.yml');
+  files.push('Dockerfile','k8s/deployment.yaml','k8s/service.yaml');
+  if(c.deploy==='openshift')files.push('k8s/route.yaml');
+  else files.push('k8s/ingress.yaml');
+  if(c.deploy==='helm')files.push(`charts/${c.proj}/Chart.yaml`,`charts/${c.proj}/values.yaml`,`charts/${c.proj}/values-${c.env}.yaml`);
+  if(c.sonar)files.push('sonar-project.properties');
+  return`# ${c.proj} — GitLab CI/CD Pipeline Package
+Generated: ${new Date().toISOString().slice(0,10)}   Language: ${m.ico} ${m.label}
+
+## Configuration
+| Field | Value |
+|-------|-------|
+| Build Tool | ${c.bt} |
+| Runtime | ${c.rt} |
+| Environment | ${c.env.toUpperCase()} |
+| Deploy Target | ${c.deploy.toUpperCase()} |
+| Namespace | ${c.ns} |
+| Registry | ${c.reg.toUpperCase()} |
+| Replicas | ${c.rep} |
+
+## Files Included
+\`\`\`
+${c.proj}-pipeline/
+${files.map(f=>'  ├── '+f).join('\n')}
+\`\`\`
+
+## Quick Start
+1. Copy \`.gitlab-ci.yml\` to the root of your repository
+2. Place \`security/*.yml\` files in your \`platform/templates\` GitLab project
+3. Copy \`k8s/\` manifests into your repository
+4. Configure GitLab CI/CD variables:
+   - \`REGISTRY_USER\` / \`REGISTRY_PASSWORD\`
+   - \`OPENSHIFT_API\` / \`OPENSHIFT_TOKEN\` (or equivalent cluster creds)
+   - \`SONAR_HOST_URL\` / \`SONAR_TOKEN\` (if SonarQube enabled)
+5. Push to branch \`${c.branch}\` to trigger the pipeline
+
+## Security Scans Included
+${[c.sonar&&'- ✅ SonarQube static analysis',c.trivy&&'- ✅ Trivy container vulnerability scan',c.sast&&'- ✅ GitLab SAST',c.dep&&'- ✅ Dependency scanning',c.sec&&'- ✅ Secret detection',c.iac&&'- ✅ IaC scanning (Checkov)'].filter(Boolean).join('\n')||'- None selected'}
+
+## Generated by DevOps Self-Service Platform
+`;
+}
+async function dlZip(){
+  if(typeof JSZip==='undefined'){toast('❌ JSZip library not loaded','error');return;}
+  const c=cfg(); toast('⏳ Building ZIP package…','info');
+  try{
+    const zip=new JSZip();
+    // Main CI file
+    zip.file('.gitlab-ci.yml',(YAMLS[c.lang]||YAMLS.java)(c));
+    // Security templates
+    const sec=zip.folder('security');
+    if(c.sonar) sec.file('sonar.yml',buildSonarYaml(c));
+    if(c.trivy) sec.file('trivy.yml',buildTrivyYaml(c));
+    if(c.iac)   sec.file('checkov.yml',buildCheckovYaml());
+    if(c.sast)  sec.file('sast.yml','include:\n  - template: Jobs/SAST.gitlab-ci.yml\nvariables:\n  SAST_EXCLUDED_PATHS: "spec,test,tests,tmp,.venv,node_modules"\n');
+    if(c.dep)   sec.file('dependency-scanning.yml','include:\n  - template: Jobs/Dependency-Scanning.gitlab-ci.yml\n');
+    if(c.sec)   sec.file('secret-detection.yml','include:\n  - template: Jobs/Secret-Detection.gitlab-ci.yml\n');
+    // Dockerfile
+    zip.file('Dockerfile',buildDockerfile(c));
+    // K8s manifests
+    const k8s=zip.folder('k8s');
+    k8s.file('deployment.yaml',buildK8sDeploy(c));
+    k8s.file('service.yaml',buildK8sSvc(c));
+    if(c.deploy==='openshift') k8s.file('route.yaml',buildOcpRoute(c));
+    else k8s.file('ingress.yaml',buildIngress(c));
+    // Helm
+    if(c.deploy==='helm'){
+      const ch=zip.folder(`charts/${c.proj}/templates`);
+      zip.file(`charts/${c.proj}/Chart.yaml`,buildHelmChart(c));
+      zip.file(`charts/${c.proj}/values.yaml`,buildHelmValues(c));
+      zip.file(`charts/${c.proj}/values-${c.env}.yaml`,`# ${c.env} environment overrides\nreplicaCount: ${c.rep}\n`);
+    }
+    // SonarQube properties
+    if(c.sonar) zip.file('sonar-project.properties',buildSonarProps(c));
+    // README
+    zip.file('README.md',buildReadme(c));
+    const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    const url=URL.createObjectURL(blob);
+    const a=Object.assign(document.createElement('a'),{href:url,download:`${c.proj}-${c.lang}-pipeline-package.zip`});
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},800);
+    toast(`✅ ${c.proj}-pipeline-package.zip downloaded!`);
+  }catch(e){toast('❌ ZIP build failed: '+e.message,'error');console.error(e);}
+}
+
+// ═══════════ TOAST ═══════════
+function toast(msg,type=''){
+  const el=document.createElement('div');
+  el.className='toast'+(type==='error'?' terr':type==='info'?' tinf':'');
+  el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>el.classList.add('show'),40);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),320);},3000);
+}
+
+// ═══════════ STATUS BADGE ═══════════
+function sb(s){
+  const M={
+    success:'bgrn',healthy:'bgrn',active:'bgrn',connected:'bgrn',approved:'bgrn',
+    failed:'bdng',degraded:'born',pending:'born',disconnected:'bdng',
+    running:'bblu',unknown:'bmut',cancelled:'bmut',inactive:'bmut',
+    high:'bdng',medium:'born',low:'bblu',
+    Group:'bblu',Project:'bvio',
+  };
+  return`<span class="badge ${M[s]||'bmut'}">${s}</span>`;
+}
+function tog(on){
+  const t=document.createElement('div');
+  t.className='tog'+(on?' on':'');
+  const d=t.appendChild(document.createElement('div'));
+  d.className='togd';
+  t.onclick=()=>t.classList.toggle('on');
+  return t;
+}
+
+// ═══════════ PAGE: DASHBOARD ═══════════
+function renderDash(){
+  const stats=[
+    {lbl:'Total Pipelines', val:'47',  sub:'▲ 8 this week',          subc:'var(--bgrn-tx)',acc:'#2563eb'},
+    {lbl:'Active Clusters', val:'6',   sub:'3 prod · 2 qa · 1 dev',  subc:'var(--muted2)', acc:'#0891b2'},
+    {lbl:'Pending Approvals',val:'5',  sub:'2 high priority',         subc:'var(--born-tx)',acc:'#f59e0b'},
+    {lbl:'Success Rate',    val:'94%', sub:'▲ 2% vs last week',       subc:'var(--bgrn-tx)',acc:'#16a34a'},
+  ];
+  const runs=[
+    {n:'payments-api',  l:'☕ Java',   st:'success',  br:'main',          t:'2 min ago', d:'4m 12s'},
+    {n:'auth-service',  l:'🟢 Node.js',st:'success',  br:'main',          t:'18 min ago',d:'2m 55s'},
+    {n:'data-processor',l:'🐍 Python', st:'failed',   br:'feature/kafka', t:'34 min ago',d:'1m 08s'},
+    {n:'api-gateway',   l:'🐹 Go',     st:'running',  br:'main',          t:'1 hr ago',  d:'—'},
+    {n:'report-svc',    l:'🔷 .NET',   st:'success',  br:'release/2.1',   t:'2 hr ago',  d:'3m 44s'},
+    {n:'user-portal',   l:'🟢 Node.js',st:'cancelled',br:'hotfix/login',  t:'3 hr ago',  d:'0m 42s'},
+  ];
+  const clusters=[
+    {n:'prod-openshift-01',h:98,c:'var(--bgrn-tx)'},
+    {n:'prod-k8s-02',      h:95,c:'var(--bgrn-tx)'},
+    {n:'qa-k8s-01',        h:87,c:'var(--born-tx)'},
+    {n:'dev-k8s-01',       h:100,c:'var(--bgrn-tx)'},
+  ];
+  const el=document.getElementById('page-dashboard');
+  el.innerHTML='';
+  const sg=el.appendChild(document.createElement('div'));
+  sg.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px;';
+  stats.forEach(s=>{
+    const c=sg.appendChild(document.createElement('div'));
+    c.className='scard'; c.style.setProperty('--acc',s.acc);
+    c.innerHTML=`<div class="slb">${s.lbl}</div><div class="sv" style="color:${s.acc};">${s.val}</div><div class="ssb" style="color:${s.subc};">${s.sub}</div>`;
+  });
+  const cols=el.appendChild(document.createElement('div'));
+  cols.style.cssText='display:grid;grid-template-columns:1fr 300px;gap:15px;';
+  // Recent runs
+  const rp=cols.appendChild(document.createElement('div'));
+  rp.className='card';
+  rp.innerHTML='<div class="ch"><span class="ct">Recent Pipeline Runs</span><span class="badge bmut">6 shown</span></div>';
+  runs.forEach(r=>{
+    const row=rp.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);';
+    const ico={success:'✅',failed:'❌',running:'🔄',cancelled:'⛔'}[r.st];
+    row.innerHTML=`<span style="font-size:16px;">${ico}</span>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${r.n} <span style="font-size:11px;color:var(--muted);font-weight:400;">· ${r.l}</span></div>
+        <div style="font-size:11px;color:var(--muted);">${r.br} · ${r.t}</div></div>
+      <div style="text-align:right;">${sb(r.st)}<div style="font-size:11px;color:var(--muted);margin-top:2px;">${r.d}</div></div>`;
+  });
+  // Right col
+  const rc=cols.appendChild(document.createElement('div'));
+  rc.style.cssText='display:flex;flex-direction:column;gap:13px;';
+  const qa=rc.appendChild(document.createElement('div'));
+  qa.className='card';
+  qa.innerHTML='<div class="ct" style="margin-bottom:13px;">Quick Actions</div>';
+  [['btn-pri','🚀 New Pipeline','pipeline'],['btn-sec','🆕 Onboard App','onboarding'],
+   ['btn-sec','🔑 Secrets','secrets'],['btn-sec','✅ Approvals','approvals']].forEach(([cls,lbl,pg])=>{
+    const b=qa.appendChild(document.createElement('button'));
+    b.className=`btn ${cls}`; b.style.cssText='width:100%;justify-content:center;margin-bottom:7px;';
+    b.textContent=lbl; b.onclick=()=>go(pg);
+  });
+  const ch=rc.appendChild(document.createElement('div'));
+  ch.className='card';
+  ch.innerHTML='<div class="ct" style="margin-bottom:13px;">Cluster Health</div>';
+  clusters.forEach(c=>{
+    const row=ch.appendChild(document.createElement('div'));
+    row.style.cssText='margin-bottom:11px;';
+    row.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;">
+        <span style="color:var(--text2);">${c.n}</span><span style="color:${c.c};font-weight:700;">${c.h}%</span></div>
+      <div class="prog"><div class="progf" style="width:${c.h}%;background:${c.c};"></div></div>`;
+  });
+}
+
+// ═══════════ PAGE: ONBOARDING ═══════════
+function renderOnboard(){
+  const recent=[
+    {app:'invoice-svc',  team:'billing',   cluster:'prod-openshift-01',status:'active', date:'2026-05-25'},
+    {app:'notif-worker', team:'platform',  cluster:'prod-k8s-02',       status:'active', date:'2026-05-22'},
+    {app:'analytics-api',team:'data',      cluster:'qa-k8s-01',         status:'pending',date:'2026-05-20'},
+    {app:'legacy-adapter',team:'migration',cluster:'dev-k8s-01',        status:'active', date:'2026-05-18'},
+  ];
+  const el=document.getElementById('page-onboarding');
+  const f=el.appendChild(document.createElement('div'));
+  f.className='card'; f.style.maxWidth='700px';
+  f.innerHTML=`<div class="st" style="margin-bottom:3px;">🆕 Application Onboarding</div>
+    <div class="sd" style="margin-bottom:20px;">Register a new application — creates namespace, RBAC, service account and initial pipeline.</div>
+    <div class="fg"><div class="fr"><label>App Name</label><input class="inp" placeholder="payments-api"></div>
+      <div class="fr"><label>Team / Owner</label><input class="inp" placeholder="platform-team"></div></div>
+    <div class="fr"><label>GitLab Repo URL</label><input class="inp" placeholder="https://gitlab.company.com/team/app"></div>
+    <div class="fg"><div class="fr"><label>Target Cluster</label>
+        <select class="inp sel"><option>prod-openshift-01</option><option>prod-k8s-02</option><option>qa-k8s-01</option><option>dev-k8s-01</option></select></div>
+      <div class="fr"><label>Namespace</label><input class="inp" placeholder="app-prod"></div></div>
+    <div class="fg"><div class="fr"><label>Language</label>
+        <select class="inp sel"><option>Java</option><option>Node.js</option><option>Python</option><option>Go</option><option>.NET</option></select></div>
+      <div class="fr"><label>Tier</label>
+        <select class="inp sel"><option>Production</option><option>Non-Production</option><option>Internal Tool</option></select></div></div>
+    <div class="fr"><label>Contact Email</label><input class="inp" placeholder="team@company.com" type="email"></div>
+    <div class="fr"><label>Description</label><textarea class="inp" rows="3" placeholder="Brief description…"></textarea></div>
+    <div style="display:flex;gap:9px;margin-top:4px;">
+      <button class="btn btn-pri" onclick="toast('✅ Onboarding submitted — namespace ready in ~2 min')">Submit Request</button>
+      <button class="btn btn-sec" onclick="toast('💾 Draft saved')">Save Draft</button>
+    </div>`;
+  const t=el.appendChild(document.createElement('div'));
+  t.className='card'; t.style.marginTop='18px';
+  t.innerHTML='<div class="ch"><span class="ct">Recent Onboardings</span></div>';
+  const tbl=t.appendChild(document.createElement('table'));
+  tbl.className='dtbl';
+  tbl.innerHTML='<thead><tr><th>App</th><th>Team</th><th>Cluster</th><th>Status</th><th>Date</th></tr></thead><tbody></tbody>';
+  recent.forEach(r=>{
+    const tr=tbl.querySelector('tbody').appendChild(document.createElement('tr'));
+    tr.innerHTML=`<td style="font-weight:600;color:var(--text);">${r.app}</td><td>${r.team}</td><td>${r.cluster}</td><td>${sb(r.status)}</td><td>${r.date}</td>`;
+  });
+}
+
+// ═══════════ PAGE: APPLICATIONS ═══════════
+function renderApps(){
+  const apps=[
+    {n:'payments-api',  l:'☕',t:'platform', c:'prod-os-01', ns:'payments-prod',r:'3/3',d:'27 May 09:12',s:'healthy'},
+    {n:'auth-service',  l:'🟢',t:'security', c:'prod-k8s-02',ns:'auth-prod',    r:'2/2',d:'26 May 17:44',s:'healthy'},
+    {n:'data-processor',l:'🐍',t:'data',     c:'qa-k8s-01',  ns:'data-qa',      r:'1/2',d:'26 May 14:02',s:'degraded'},
+    {n:'api-gateway',   l:'🐹',t:'platform', c:'prod-os-01', ns:'gateway-prod', r:'4/4',d:'25 May 22:10',s:'healthy'},
+    {n:'report-svc',    l:'🔷',t:'reports',  c:'prod-k8s-02',ns:'reports-prod', r:'2/2',d:'24 May 11:30',s:'healthy'},
+    {n:'legacy-adapter',l:'☕',t:'migration',c:'dev-k8s-01', ns:'legacy-dev',   r:'1/1',d:'20 May 08:00',s:'unknown'},
+  ];
+  const el=document.getElementById('page-applications');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">📦 Applications</div><div class="sd">All registered applications across clusters</div></div>';
+  const br=h.appendChild(document.createElement('div'));
+  br.style.cssText='display:flex;gap:9px;align-items:center;';
+  br.innerHTML='<input class="inp" placeholder="🔍 Search…" style="width:190px;">';
+  const b=br.appendChild(document.createElement('button'));
+  b.className='btn btn-pri'; b.textContent='+ Onboard New'; b.onclick=()=>go('onboarding');
+  const w=el.appendChild(document.createElement('div'));
+  w.className='twrap';
+  const tbl=w.appendChild(document.createElement('table'));
+  tbl.className='dtbl';
+  tbl.innerHTML='<thead><tr><th>Application</th><th>Language</th><th>Cluster / NS</th><th>Replicas</th><th>Last Deploy</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody>';
+  apps.forEach(a=>{
+    const tr=tbl.querySelector('tbody').appendChild(document.createElement('tr'));
+    tr.innerHTML=`<td><span style="font-weight:700;color:var(--text);">${a.n}</span><br><span style="font-size:11px;">${a.t}</span></td>
+      <td style="text-align:center;font-size:19px;">${a.l}</td>
+      <td style="font-size:12px;">${a.c}<br>${a.ns}</td>
+      <td style="text-align:center;">${a.r}</td>
+      <td style="font-size:12px;">${a.d}</td>
+      <td>${sb(a.s)}</td>
+      <td><div style="display:flex;gap:5px;">
+        <button class="btn btn-sec bsm" onclick="toast('🔄 Redeploy triggered for ${a.n}')">Redeploy</button>
+        <button class="btn btn-sec bsm" onclick="toast('📋 Logs for ${a.n}')">Logs</button>
+      </div></td>`;
+  });
+}
+
+// ═══════════ PAGE: CLUSTERS ═══════════
+function renderClusters(){
+  const cls=[
+    {n:'prod-openshift-01',t:'OpenShift 4.14', e:'Production',nd:12,cpu:'68%',apps:18,h:98, c:'var(--bgrn-tx)'},
+    {n:'prod-k8s-02',      t:'Kubernetes 1.29',e:'Production',nd:8, cpu:'52%',apps:12,h:95, c:'var(--bgrn-tx)'},
+    {n:'qa-k8s-01',        t:'Kubernetes 1.28',e:'QA',         nd:4, cpu:'34%',apps:9, h:87, c:'var(--born-tx)'},
+    {n:'dev-k8s-01',       t:'Kubernetes 1.29',e:'Development',nd:3, cpu:'22%',apps:14,h:100,c:'var(--bgrn-tx)'},
+    {n:'dr-openshift-02',  t:'OpenShift 4.13', e:'DR',         nd:6, cpu:'5%', apps:0, h:100,c:'var(--bgrn-tx)'},
+    {n:'sandbox-k8s-01',   t:'Kubernetes 1.30',e:'Sandbox',    nd:2, cpu:'15%',apps:5, h:92, c:'var(--bgrn-tx)'},
+  ];
+  const el=document.getElementById('page-clusters');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">☸️ Clusters</div><div class="sd">Kubernetes &amp; OpenShift cluster registry</div></div>';
+  const rb=h.appendChild(document.createElement('button'));
+  rb.className='btn btn-pri'; rb.textContent='+ Register Cluster'; rb.onclick=()=>toast('📡 Register Cluster','info');
+  const g=el.appendChild(document.createElement('div'));
+  g.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;';
+  cls.forEach(c=>{
+    const card=g.appendChild(document.createElement('div'));
+    card.className='card';
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px;">
+        <div><div style="font-size:14px;font-weight:700;color:var(--text);">${c.n}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">${c.t} · ${c.e}</div></div>
+        <span class="badge bgrn">${c.h}% healthy</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:13px;">
+        ${[['Nodes',c.nd,'var(--bblu-tx)'],['CPU',c.cpu,'var(--born-tx)'],['Apps',c.apps,'var(--bvio-tx)']].map(([l,v,col])=>
+          `<div style="text-align:center;background:var(--inp);padding:9px;border-radius:7px;border:1px solid var(--border);">
+            <div style="font-size:17px;font-weight:800;color:${col};">${v}</div>
+            <div style="font-size:10px;color:var(--muted);">${l}</div></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-sec bsm" style="flex:1;" onclick="toast('📊 ${c.n} dashboard')">Dashboard</button>
+        <button class="btn btn-sec bsm" style="flex:1;" onclick="toast('📋 ${c.n} namespaces')">Namespaces</button>
+      </div>`;
+  });
+}
+
+// ═══════════ PAGE: SECRETS ═══════════
+function renderSecrets(){
+  const srcs=[{ico:'🔐',n:'GitLab Variables',cnt:24,a:true},{ico:'🏛',n:'HashiCorp Vault',cnt:38,a:false},{ico:'🏢',n:'Internal CSM',cnt:12,a:false},{ico:'☁️',n:'AWS Secrets Mgr',cnt:9,a:false}];
+  const vars=[
+    {n:'SONAR_TOKEN',       s:'Group',  e:'All',       p:true, m:true},
+    {n:'REGISTRY_PASSWORD', s:'Group',  e:'All',       p:true, m:true},
+    {n:'OPENSHIFT_TOKEN',   s:'Project',e:'production',p:true, m:true},
+    {n:'SLACK_WEBHOOK_URL', s:'Group',  e:'All',       p:false,m:true},
+    {n:'JAVA_VERSION',      s:'Project',e:'All',       p:false,m:false},
+    {n:'NEXUS_URL',         s:'Group',  e:'All',       p:false,m:false},
+    {n:'VAULT_TOKEN',       s:'Project',e:'production',p:true, m:true},
+  ];
+  const el=document.getElementById('page-secrets');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">🔑 Secrets Management</div><div class="sd">CI/CD variables and vault-backed secrets</div></div>';
+  const ab=h.appendChild(document.createElement('button'));
+  ab.className='btn btn-pri'; ab.textContent='+ Add Secret'; ab.onclick=()=>toast('🔑 Add Secret');
+  const lay=el.appendChild(document.createElement('div'));
+  lay.style.cssText='display:grid;grid-template-columns:230px 1fr;gap:15px;';
+  const sp=lay.appendChild(document.createElement('div'));
+  sp.className='card';
+  sp.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:11px;">Secret Sources</div>';
+  srcs.forEach((s,i)=>{
+    const item=sp.appendChild(document.createElement('div'));
+    item.style.cssText=`padding:9px 11px;border-radius:8px;cursor:pointer;margin-bottom:3px;background:${s.a?'var(--infoBg)':'transparent'};border:1px solid ${s.a?'var(--primary)':'transparent'};`;
+    item.innerHTML=`<div style="font-size:13px;color:var(--text);">${s.ico} ${s.n}</div><div style="font-size:11px;color:var(--muted);">${s.cnt} secrets</div>`;
+    item.onclick=()=>{sp.querySelectorAll('[data-src]').forEach(d=>{d.style.background='transparent';d.style.borderColor='transparent';});item.style.background='var(--infoBg)';item.style.borderColor='var(--primary)';};
+    item.setAttribute('data-src','');
+  });
+  const tw=lay.appendChild(document.createElement('div'));
+  tw.className='twrap';
+  const tb=tw.appendChild(document.createElement('div'));
+  tb.style.cssText='padding:13px 15px;border-bottom:1px solid var(--border);display:flex;gap:9px;';
+  tb.innerHTML='<input class="inp" placeholder="🔍 Filter…" style="flex:1;"><select class="inp sel" style="width:145px;"><option>All Scopes</option><option>Group</option><option>Project</option></select>';
+  const tbl=tw.appendChild(document.createElement('table'));
+  tbl.className='dtbl';
+  tbl.innerHTML='<thead><tr><th>Variable Name</th><th>Scope</th><th>Env</th><th>Protected</th><th>Masked</th><th>Actions</th></tr></thead><tbody></tbody>';
+  vars.forEach(v=>{
+    const tr=tbl.querySelector('tbody').appendChild(document.createElement('tr'));
+    tr.innerHTML=`<td style="font-family:monospace;color:var(--bblu-tx);font-size:12px;">${v.n}</td>
+      <td>${sb(v.s)}</td><td style="font-size:12px;">${v.e}</td>
+      <td style="text-align:center;">${v.p?'🔒':'—'}</td>
+      <td style="text-align:center;">${v.m?'🙈':'👁'}</td>
+      <td><div style="display:flex;gap:5px;justify-content:center;">
+        <button class="btn btn-sec bsm" onclick="toast('✏️ Edit ${v.n}')">Edit</button>
+        <button class="btn btn-dng bsm" onclick="toast('🗑 Deleted ${v.n}')">Delete</button>
+      </div></td>`;
+  });
+}
+
+// ═══════════ PAGE: APPROVALS ═══════════
+function renderApprovals(){
+  const items=[
+    {id:'APR-083',app:'payments-api',  br:'main',         type:'Production Deploy',desc:'Deploy v2.4.1 to prod-openshift-01 / payments-prod',req:'alice',t:'10 min ago',p:'high'},
+    {id:'APR-082',app:'auth-service',  br:'release/3.0',  type:'Production Deploy',desc:'New OAuth2.0 flow — breaking change in token format',req:'bob',  t:'45 min ago',p:'high'},
+    {id:'APR-081',app:'report-svc',    br:'feature/pdf',  type:'Config Change',    desc:'Update memory limit from 512Mi to 1Gi',              req:'carol',t:'2 hrs ago', p:'medium'},
+    {id:'APR-080',app:'api-gateway',   br:'main',         type:'Secret Update',    desc:'Rotate OPENSHIFT_TOKEN in production',               req:'dave', t:'3 hrs ago', p:'medium'},
+    {id:'APR-079',app:'data-processor',br:'main',         type:'Namespace Onboard',desc:'New application onboarding — data team',             req:'eve',  t:'5 hrs ago', p:'low'},
+  ];
+  const el=document.getElementById('page-approvals');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">✅ Approvals</div><div class="sd">Pending deployment and configuration approvals</div></div><span class="badge bgrn">12 Approved Today</span>';
+  items.forEach(a=>{
+    const card=el.appendChild(document.createElement('div'));
+    card.className=`aprc p${a.p==='high'?'hi':a.p==='medium'?'md':'lo'}`;
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:11px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
+            <span style="font-size:11px;font-family:monospace;color:var(--muted);">${a.id}</span>
+            ${sb(a.p)}<span class="badge bvio">${a.type}</span></div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;">${a.app} <span style="font-size:12px;color:var(--muted);font-weight:400;">· ${a.br}</span></div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">${a.desc}</div>
+          <div style="font-size:11px;color:var(--muted);">Requested by ${a.req} · ${a.t}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;" class="ab"></div>
+      </div>`;
+    const bc=card.querySelector('.ab');
+    const approve=bc.appendChild(document.createElement('button'));
+    approve.className='btn btn-ok bsm'; approve.style.minWidth='105px';
+    approve.textContent='✅ Approve'; approve.onclick=()=>{card.style.opacity='.4';toast(`✅ ${a.id} approved`);};
+    const reject=bc.appendChild(document.createElement('button'));
+    reject.className='btn btn-dng bsm'; reject.style.minWidth='105px';
+    reject.textContent='❌ Reject'; reject.onclick=()=>{card.style.opacity='.4';toast(`❌ ${a.id} rejected`,'error');};
+    const det=bc.appendChild(document.createElement('button'));
+    det.className='btn btn-sec bsm'; det.style.minWidth='105px';
+    det.textContent='View Details'; det.onclick=()=>toast(`📋 ${a.id} details`,'info');
+  });
+}
+
+// ═══════════ PAGE: AUDIT LOGS ═══════════
+function renderAudit(){
+  const logs=[
+    {ts:'2026-05-27 09:42:11',u:'alice', a:'DEPLOY',        r:'payments-api → prod',    rs:'success',ip:'10.0.1.42'},
+    {ts:'2026-05-27 09:38:04',u:'system',a:'PIPELINE_RUN',  r:'auth-service #247',       rs:'success',ip:'—'},
+    {ts:'2026-05-27 09:21:55',u:'bob',   a:'APPROVE',        r:'APR-080',                rs:'success',ip:'10.0.1.67'},
+    {ts:'2026-05-27 08:59:33',u:'carol', a:'SECRET_UPDATE',  r:'OPENSHIFT_TOKEN',        rs:'success',ip:'10.0.2.11'},
+    {ts:'2026-05-27 08:44:12',u:'dave',  a:'DELETE',         r:'legacy-adapter ns',      rs:'success',ip:'10.0.1.55'},
+    {ts:'2026-05-27 08:31:07',u:'eve',   a:'LOGIN',          r:'platform UI',            rs:'success',ip:'10.0.3.22'},
+    {ts:'2026-05-27 07:58:49',u:'unknown',a:'LOGIN',         r:'platform UI',            rs:'failed', ip:'185.220.101.7'},
+    {ts:'2026-05-27 07:45:22',u:'system',a:'PIPELINE_RUN',  r:'data-processor #189',     rs:'failed', ip:'—'},
+    {ts:'2026-05-27 07:12:00',u:'alice', a:'SECRET_CREATE',  r:'VAULT_TOKEN',            rs:'success',ip:'10.0.1.42'},
+    {ts:'2026-05-27 06:55:33',u:'bob',   a:'ONBOARD',        r:'invoice-svc',            rs:'success',ip:'10.0.1.67'},
+  ];
+  const el=document.getElementById('page-auditlogs');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">📋 Audit Logs</div><div class="sd">Immutable platform activity trail</div></div>';
+  const eb=h.appendChild(document.createElement('button'));
+  eb.className='btn btn-sec'; eb.textContent='⬇ Export CSV'; eb.onclick=()=>toast('📥 Exporting…','info');
+  const f=el.appendChild(document.createElement('div'));
+  f.className='card'; f.style.cssText='display:flex;gap:11px;flex-wrap:wrap;margin-bottom:15px;';
+  f.innerHTML=`<input class="inp" placeholder="🔍 Search events…" style="flex:1;min-width:160px;">
+    <select class="inp sel" style="width:155px;"><option>All Actions</option><option>Deploy</option><option>Approve</option><option>Secret</option><option>Login</option></select>
+    <select class="inp sel" style="width:155px;"><option>All Users</option><option>alice</option><option>bob</option><option>carol</option></select>
+    <select class="inp sel" style="width:130px;"><option>Last 24h</option><option>Last 7d</option><option>Last 30d</option></select>`;
+  const tw=el.appendChild(document.createElement('div'));
+  tw.className='twrap';
+  const tbl=tw.appendChild(document.createElement('table'));
+  tbl.className='dtbl';
+  tbl.innerHTML='<thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Resource</th><th>Result</th><th>IP</th></tr></thead><tbody></tbody>';
+  logs.forEach(l=>{
+    const tr=tbl.querySelector('tbody').appendChild(document.createElement('tr'));
+    tr.innerHTML=`<td style="font-family:monospace;font-size:11px;">${l.ts}</td><td style="text-align:center;">${l.u}</td>
+      <td style="text-align:center;"><span style="font-family:monospace;font-size:11px;background:var(--infoBg);color:var(--infoTx);padding:2px 7px;border-radius:4px;">${l.a}</span></td>
+      <td>${l.r}</td><td style="text-align:center;">${sb(l.rs)}</td>
+      <td style="text-align:center;font-family:monospace;font-size:11px;color:var(--muted);">${l.ip}</td>`;
+  });
+  const foot=tw.appendChild(document.createElement('div'));
+  foot.style.cssText='padding:11px 18px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;';
+  foot.textContent='Showing 10 of 1,247 events';
+}
+
+// ═══════════ PAGE: ADMIN ═══════════
+function renderAdmin(){
+  const users=[
+    {n:'Alice Chen', e:'alice@company.com',r:'Platform Admin',s:'active'},
+    {n:'Bob Kumar',  e:'bob@company.com',  r:'Developer',     s:'active'},
+    {n:'Carol Singh',e:'carol@company.com',r:'Developer',     s:'active'},
+    {n:'Dave Lee',   e:'dave@company.com', r:'Viewer',        s:'inactive'},
+    {n:'Eve Patel',  e:'eve@company.com',  r:'Developer',     s:'active'},
+  ];
+  const ints=[
+    {ico:'🦊',n:'GitLab CE/EE',    s:'connected',   d:'gitlab.company.com · v16.9'},
+    {ico:'🔍',n:'SonarQube',       s:'connected',   d:'sonar.company.com · v10.4'},
+    {ico:'🏛', n:'HashiCorp Vault', s:'connected',   d:'vault.company.com · v1.15'},
+    {ico:'💬',n:'Slack',           s:'connected',   d:'#devops-alerts'},
+    {ico:'📦',n:'Nexus Repository',s:'connected',   d:'nexus.company.com · v3.67'},
+    {ico:'🔒',n:'Trivy Server',    s:'disconnected',d:'Not configured'},
+  ];
+  const groups=[
+    {n:'platform-admins',m:3, p:'Full Access'},
+    {n:'developers',     m:18,p:'Build & Deploy'},
+    {n:'security-team',  m:5, p:'Scan Results Read'},
+    {n:'viewers',        m:22,p:'Read Only'},
+  ];
+  const stats=[
+    {l:'Total Pipeline Runs (30d)',v:'1,842',i:'🚀'},
+    {l:'Avg Build Time',          v:'3m 28s',i:'⏱'},
+    {l:'Security Issues Found',   v:'47',    i:'🔒'},
+    {l:'Active Users',            v:'48',    i:'👥'},
+    {l:'Storage Used',            v:'342 GB',i:'💾'},
+    {l:'Uptime (30d)',            v:'99.94%',i:'✅'},
+  ];
+  const el=document.getElementById('page-admin');
+  el.innerHTML=`<div class="st" style="margin-bottom:3px;">🛠 Admin</div>
+    <div class="sd" style="margin-bottom:20px;">Users, groups, permissions and integrations</div>`;
+  const g=el.appendChild(document.createElement('div'));
+  g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:16px;';
+  // Users
+  const up=g.appendChild(document.createElement('div'));
+  up.className='card';
+  up.innerHTML='<div class="ch"><span class="ct">👤 Users</span></div>';
+  const ib=up.querySelector('.ch').appendChild(document.createElement('button'));
+  ib.className='btn btn-pri bsm'; ib.textContent='+ Invite'; ib.onclick=()=>toast('➕ Invite user');
+  users.forEach(u=>{
+    const row=up.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML=`<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">${u.n[0]}</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${u.n}</div><div style="font-size:11px;color:var(--muted);">${u.e}</div></div>
+      <div style="text-align:right;"><span class="badge ${u.r==='Platform Admin'?'born':'bblu'}">${u.r}</span><div style="margin-top:3px;">${sb(u.s)}</div></div>`;
+  });
+  // Integrations
+  const ip=g.appendChild(document.createElement('div'));
+  ip.className='card';
+  ip.innerHTML='<div class="ct" style="margin-bottom:13px;">🔌 Integrations</div>';
+  ints.forEach(i=>{
+    const row=ip.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML=`<span style="font-size:21px;">${i.ico}</span>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${i.n}</div><div style="font-size:11px;color:var(--muted);">${i.d}</div></div>
+      ${sb(i.s)}`;
+  });
+  const ab2=ip.appendChild(document.createElement('button'));
+  ab2.className='btn btn-sec bsm'; ab2.style.cssText='margin-top:11px;width:100%;';
+  ab2.textContent='+ Add Integration'; ab2.onclick=()=>toast('⚙️ Configure integration','info');
+  // Groups
+  const gp=g.appendChild(document.createElement('div'));
+  gp.className='card';
+  gp.innerHTML='<div class="ct" style="margin-bottom:13px;">🏷 Groups &amp; Permissions</div>';
+  groups.forEach(gr=>{
+    const row=gp.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML=`<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--text);">${gr.n}</div><div style="font-size:11px;color:var(--muted);">${gr.m} members · ${gr.p}</div></div>`;
+    const eb=row.appendChild(document.createElement('button'));
+    eb.className='btn btn-sec bsm'; eb.textContent='Edit'; eb.onclick=()=>toast(`✏️ Edit ${gr.n}`);
+  });
+  const ag=gp.appendChild(document.createElement('button'));
+  ag.className='btn btn-sec bsm'; ag.style.cssText='margin-top:11px;width:100%;';
+  ag.textContent='+ Create Group'; ag.onclick=()=>toast('➕ Create group');
+  // Stats
+  const sp=g.appendChild(document.createElement('div'));
+  sp.className='card';
+  sp.innerHTML='<div class="ct" style="margin-bottom:13px;">📈 Platform Stats</div>';
+  stats.forEach(s=>{
+    const row=sp.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML=`<span style="font-size:13px;color:var(--text2);">${s.i} ${s.l}</span><span style="font-size:14px;font-weight:700;color:var(--text);">${s.v}</span>`;
+  });
+}
+
+// ═══════════ PAGE: SETTINGS ═══════════
+function renderSettings(){
+  const notifs=[
+    {l:'Pipeline failure alerts',   d:'Notify on failed pipeline runs',   on:true},
+    {l:'Approval requests',         d:'Alert when approval needed',        on:true},
+    {l:'Security scan results',     d:'Summary of daily scan findings',    on:true},
+    {l:'Weekly digest',             d:'Weekly platform health report',     on:false},
+    {l:'Cluster alerts',            d:'Node down or high utilisation',     on:true},
+  ];
+  const secDef=[
+    {l:'Require SonarQube gate',            on:true},
+    {l:'Require Trivy scan before deploy',  on:true},
+    {l:'Block deploy on CRITICAL CVE',      on:true},
+    {l:'Mandatory secret detection',        on:true},
+    {l:'IaC scan (Checkov)',                on:false},
+  ];
+  const accents=['#2563eb','#7c3aed','#0891b2','#059669','#dc2626','#d97706'];
+  const el=document.getElementById('page-settings');
+  el.innerHTML=`<div class="st" style="margin-bottom:3px;">⚙️ Settings</div>
+    <div class="sd" style="margin-bottom:20px;">Platform configuration and preferences</div>`;
+  const g=el.appendChild(document.createElement('div'));
+  g.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:16px;';
+  // Appearance
+  const ap=g.appendChild(document.createElement('div'));
+  ap.className='card';
+  ap.innerHTML=`<div class="ct" style="margin-bottom:15px;">🎨 Appearance &amp; Theme</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px;background:var(--inp);border:1px solid var(--border);border-radius:9px;margin-bottom:13px;">
+      <div><div style="font-size:13px;font-weight:600;color:var(--text);">Interface Theme</div>
+        <div style="font-size:11px;color:var(--muted);">Toggle dark / light mode</div></div>
+      <button class="btn btn-pri bsm" onclick="toggleTheme()">Switch Theme</button>
+    </div>
+    <div class="fr"><label>Accent Color</label><div style="display:flex;gap:9px;flex-wrap:wrap;" id="acc-sw"></div></div>
+    <div class="fr"><label>Items Per Page</label><select class="inp sel"><option>25</option><option>50</option><option>100</option></select></div>
+    <div class="fr"><label>Timezone</label><select class="inp sel"><option>Asia/Kolkata (IST)</option><option>UTC</option><option>US/Eastern</option><option>Europe/London</option></select></div>`;
+  const sw=ap.querySelector('#acc-sw');
+  accents.forEach((col,i)=>{
+    const s=sw.appendChild(document.createElement('div'));
+    s.style.cssText=`width:24px;height:24px;border-radius:50%;background:${col};cursor:pointer;transition:.2s;${i===0?'outline:2px solid var(--text);outline-offset:2px;':''}`;
+    s.onclick=()=>{sw.querySelectorAll('div').forEach(d=>d.style.outline='none');s.style.outline='2px solid var(--text)';s.style.outlineOffset='2px';};
+  });
+  const saveAp=ap.appendChild(document.createElement('button'));
+  saveAp.className='btn btn-pri'; saveAp.style.marginTop='8px';
+  saveAp.textContent='Save Preferences'; saveAp.onclick=()=>toast('✅ Appearance saved');
+  // Platform config
+  const pc=g.appendChild(document.createElement('div'));
+  pc.className='card';
+  pc.innerHTML=`<div class="ct" style="margin-bottom:15px;">🌐 Platform Config</div>
+    <div class="fr"><label>Platform Name</label><input class="inp" value="DevOps Platform — Enterprise"></div>
+    <div class="fr"><label>GitLab Base URL</label><input class="inp" value="https://gitlab.company.com"></div>
+    <div class="fr"><label>Default Cluster</label><select class="inp sel"><option>prod-openshift-01</option><option>prod-k8s-02</option></select></div>
+    <div class="fr"><label>Default Registry</label><select class="inp sel"><option>Nexus (nexus.company.com)</option><option>GitLab Registry</option><option>Artifactory</option></select></div>
+    <div class="fr"><label>Default Branch</label><input class="inp" value="main"></div>`;
+  const savePC=pc.appendChild(document.createElement('button'));
+  savePC.className='btn btn-pri'; savePC.textContent='Save Changes'; savePC.onclick=()=>toast('✅ Platform config saved');
+  // Notifications
+  const np=g.appendChild(document.createElement('div'));
+  np.className='card';
+  np.innerHTML='<div class="ct" style="margin-bottom:14px;">🔔 Notifications</div>';
+  notifs.forEach(n=>{
+    const row=np.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);';
+    const info=row.appendChild(document.createElement('div'));
+    info.innerHTML=`<div style="font-size:13px;font-weight:600;color:var(--text);">${n.l}</div><div style="font-size:11px;color:var(--muted);">${n.d}</div>`;
+    row.appendChild(tog(n.on));
+  });
+  const slRow=np.appendChild(document.createElement('div'));
+  slRow.className='fr'; slRow.style.marginTop='13px;';
+  slRow.innerHTML='<label>Slack Webhook URL</label><input class="inp" value="https://hooks.slack.com/services/…">';
+  const saveN=np.appendChild(document.createElement('button'));
+  saveN.className='btn btn-pri'; saveN.textContent='Save'; saveN.onclick=()=>toast('✅ Notifications saved');
+  // Security defaults
+  const sp2=g.appendChild(document.createElement('div'));
+  sp2.className='card';
+  sp2.innerHTML='<div class="ct" style="margin-bottom:14px;">🛡 Security Defaults</div>';
+  secDef.forEach(s=>{
+    const row=sp2.appendChild(document.createElement('div'));
+    row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);';
+    const lbl=row.appendChild(document.createElement('span'));
+    lbl.style.cssText='font-size:13px;color:var(--text2);'; lbl.textContent=s.l;
+    row.appendChild(tog(s.on));
+  });
+  const saveSec=sp2.appendChild(document.createElement('button'));
+  saveSec.className='btn btn-pri'; saveSec.style.marginTop='13px';
+  saveSec.textContent='Save Defaults'; saveSec.onclick=()=>toast('✅ Security defaults saved');
+}
+
+
+// ═══════════ PAGE: TEMPLATES ═══════════
+function renderTemplates(){
+  const tmpls=[
+    {n:'Java Spring Boot — OpenShift Full',lang:'java',  bt:'Maven', dep:'openshift',uses:47,updated:'2026-05-20',system:true, tags:['prod','java','ocp']},
+    {n:'Node.js — EKS + ECR',              lang:'nodejs',bt:'npm',   dep:'eks',      uses:31,updated:'2026-05-18',system:true, tags:['aws','node','eks']},
+    {n:'Python FastAPI — Kubernetes',      lang:'python',bt:'pip',   dep:'kubernetes',uses:19,updated:'2026-05-10',system:true, tags:['k8s','python']},
+    {n:'Go Microservice — GKE',            lang:'go',    bt:'go',    dep:'gke',       uses:12,updated:'2026-04-28',system:true, tags:['gcp','go','gke']},
+    {n:'.NET — Helm Chart Deploy',         lang:'dotnet',bt:'dotnet',dep:'helm',      uses:8, updated:'2026-04-15',system:true, tags:['dotnet','helm']},
+    {n:'Java EAR — Nexus + OpenShift',     lang:'java',  bt:'Gradle',dep:'openshift', uses:6, updated:'2026-05-01',system:false,tags:['ear','nexus','ocp']},
+    {n:'Node.js Minimal — GitOps ArgoCD',  lang:'nodejs',bt:'yarn',  dep:'argocd',    uses:4, updated:'2026-04-22',system:false,tags:['argocd','gitops']},
+  ];
+  const el=document.getElementById('page-templates');
+  el.innerHTML='';
+  const h=el.appendChild(document.createElement('div'));
+  h.className='sh';
+  h.innerHTML='<div><div class="st">📄 Pipeline Templates</div><div class="sd">Reusable pipeline configurations for common stacks</div></div>';
+  const br=h.appendChild(document.createElement('div'));
+  br.style.cssText='display:flex;gap:9px;align-items:center;';
+  br.innerHTML='<input class="inp" placeholder="🔍 Search templates…" style="width:200px;"><select class="inp sel" style="width:150px;"><option>All Languages</option><option>Java</option><option>Node.js</option><option>Python</option><option>Go</option><option>.NET</option></select>';
+  const nb=br.appendChild(document.createElement('button'));
+  nb.className='btn btn-pri'; nb.textContent='+ Save Current Config';
+  nb.onclick=()=>{
+    const c=cfg();
+    const m=LM[c.lang];
+    toast(`💾 Template "${c.proj} — ${m.label}/${c.bt}" saved to library`);
+  };
+  const grid=el.appendChild(document.createElement('div'));
+  grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-top:4px;';
+  tmpls.forEach(t=>{
+    const m=LM[t.lang]||LM.java;
+    const card=grid.appendChild(document.createElement('div'));
+    card.className='card';
+    card.style.cssText='display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:border-color .2s;';
+    card.onmouseenter=()=>card.style.borderColor='var(--primary)';
+    card.onmouseleave=()=>card.style.borderColor='var(--border)';
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div style="font-size:21px;">${m.ico}</div>
+        ${t.system?'<span class="badge bblu">System</span>':'<span class="badge bvio">Custom</span>'}
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">${t.n}</div>
+        <div style="font-size:12px;color:var(--muted);">${m.label} · ${t.bt} · Deploy: ${t.dep}</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        ${t.tags.map(tg=>`<span style="font-size:11px;background:var(--panel2);border:1px solid var(--border);padding:2px 8px;border-radius:10px;color:var(--muted2);">${tg}</span>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:11px;">
+        <span>Used ${t.uses}×</span><span>Updated ${t.updated}</span>
+      </div>`;
+    const btns=card.appendChild(document.createElement('div'));
+    btns.style.cssText='display:flex;gap:7px;';
+    const useBtn=btns.appendChild(document.createElement('button'));
+    useBtn.className='btn btn-pri bsm'; useBtn.style.flex='1';
+    useBtn.textContent='Use Template';
+    useBtn.onclick=(e)=>{
+      e.stopPropagation();
+      // Pre-fill wizard with template lang
+      selLang(t.lang);
+      go('pipeline');
+      toast(`✅ Loaded template: ${t.n}`);
+    };
+    const preBtn=btns.appendChild(document.createElement('button'));
+    preBtn.className='btn btn-sec bsm'; preBtn.style.flex='1';
+    preBtn.textContent='Preview YAML';
+    preBtn.onclick=(e)=>{
+      e.stopPropagation();
+      showTemplatePreview(t,m);
+    };
+  });
+}
+
+function showTemplatePreview(t,m){
+  // Build a mock config from template meta and show a modal
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  const modal=overlay.appendChild(document.createElement('div'));
+  modal.style.cssText='background:var(--panel);border:1px solid var(--border);border-radius:14px;width:720px;max-width:94vw;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;';
+  modal.innerHTML=`<div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:15px;font-weight:700;color:var(--text);">${m.ico} ${t.n}</div>
+      <button class="btn btn-sec bsm" id="close-modal">✕ Close</button>
+    </div>
+    <div style="padding:18px 20px;overflow-y:auto;flex:1;">
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px;">
+        <span class="badge bblu">${m.label}</span>
+        <span class="badge born">${t.bt}</span>
+        <span class="badge bgrn">${t.dep}</span>
+        ${t.system?'<span class="badge bblu">System Template</span>':'<span class="badge bvio">Custom Template</span>'}
+      </div>
+      <div class="ybox" style="border-radius:9px;border:1px solid var(--border);">
+        <pre class="y" id="tmpl-yaml-out"></pre>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;">
+      <button class="btn btn-sec bsm" onclick="navigator.clipboard.writeText(document.getElementById('tmpl-yaml-out').textContent).then(()=>toast('📋 Copied!'))">📋 Copy YAML</button>
+      <button class="btn btn-pri bsm" onclick="selLang('${t.lang}');go('pipeline');document.body.removeChild(this.closest('[style*=fixed]'));toast('✅ Template loaded in wizard');">Use This Template</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#close-modal').onclick=()=>document.body.removeChild(overlay);
+  overlay.onclick=(e)=>{if(e.target===overlay)document.body.removeChild(overlay);};
+  // Generate sample YAML
+  const mockCfg={proj:t.n.split('—')[0].trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+    team:'platform',repo:'https://gitlab.company.com/team/app',branch:'main',env:'prod',
+    lc:'existing',lang:t.lang,bt:t.bt,pkg:'JAR',rt:'17 (LTS)',
+    sonar:true,sast:true,dep:true,sec:true,trivy:true,iac:false,
+    docker:true,df:'Dockerfile',tag:'CI_COMMIT_SHORT_SHA',multi:'Yes',baseImg:'eclipse-temurin:17-jre-alpine',
+    reg:'gitlab',regUrl:'',deploy:t.dep,cluster:'cluster-01',
+    ns:'app-prod',host:'app.company.com',rep:'3',cpuR:'250m',memR:'512Mi',cpuL:'1',memL:'1Gi',
+    secSrc:'GitLab Variables',
+  };
+  overlay.querySelector('#tmpl-yaml-out').textContent=(YAMLS[t.lang]||YAMLS.java)(mockCfg);
+}
+
+
+// ═══════════ SIDEBAR COLLAPSE ═══════════
+let sidebarOpen = true;
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('collapse-btn');
+  sidebarOpen = !sidebarOpen;
+  sb.classList.toggle('collapsed', !sidebarOpen);
+  btn.textContent = sidebarOpen ? '◀' : '▶';
+  btn.title = sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar';
+}
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded',()=>{
+  buildStepNav();
+  renderDash(); renderOnboard(); renderApps();
+  renderClusters(); renderSecrets(); renderApprovals();
+  renderAudit(); renderAdmin(); renderSettings(); renderTemplates();
+  go('dashboard');
+});
+</script>
+</body>
+</html>
